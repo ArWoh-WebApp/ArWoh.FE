@@ -1,24 +1,39 @@
-# Logs
-logs
+# Created by https://www.toptal.com/developers/gitignore/api/react,visualstudiocode
+# Edit at https://www.toptal.com/developers/gitignore?templates=react,visualstudiocode
+
+### react ###
+.DS_*
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+logs
+**/*.backup.*
+**/*.back.*
 
 node_modules
-dist
-dist-ssr
-*.local
+bower_components
 
-# Editor directories and files
+*.sublime*
+
+psd
+thumb
+sketch
+
+### VisualStudioCode ###
 .vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
 !.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+!.vscode/*.code-snippets
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
+.ionide
+
+# End of https://www.toptal.com/developers/gitignore/api/react,visualstudiocode
