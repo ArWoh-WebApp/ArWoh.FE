@@ -102,7 +102,7 @@ export default function LoginPage() {
               <Button
                 className="w-full h-12 text-white text-base font-medium"
                 style={{
-                  background: "linear-gradient(to right, #8B2CF5, #9747FF)",
+                  background: "linear-gradient(90deg, #4F0094, #920072)",
                   border: "none",
                   borderRadius: "8px",
                 }}

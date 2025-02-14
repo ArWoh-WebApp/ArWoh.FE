@@ -11,7 +11,8 @@ import backgroundImage from "@/assets/images/login.png"
 import logoImage from "@/assets/images/logo.png"
 
 export default function RegisterPage() {
-	const [showPassword, setShowPassword] = useState(false)
+	const [showPassword1, setShowPassword1] = useState(false)
+	const [showPassword2, setShowPassword2] = useState(false)
 
 	return (
 		<main className="min-h-screen w-full relative bg-[#0D0D0D] overflow-hidden">
@@ -82,16 +83,16 @@ export default function RegisterPage() {
 								<div className="relative">
 									<Input
 										id="password"
-										type={showPassword ? "text" : "password"}
+										type={showPassword1 ? "text" : "password"}
 										placeholder="Enter your password"
 										className="bg-white border-0 text-black placeholder:text-gray-500 h-12"
 									/>
 									<button
 										type="button"
-										onClick={() => setShowPassword(!showPassword)}
+										onClick={() => setShowPassword1(!showPassword1)}
 										className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
 									>
-										{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+										{showPassword1 ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
 									</button>
 								</div>
 							</div>
@@ -103,16 +104,16 @@ export default function RegisterPage() {
 								<div className="relative">
 									<Input
 										id="password"
-										type={showPassword ? "text" : "password"}
+										type={showPassword2 ? "text" : "password"}
 										placeholder="Confirm your password"
 										className="bg-white border-0 text-black placeholder:text-gray-500 h-12"
 									/>
 									<button
 										type="button"
-										onClick={() => setShowPassword(!showPassword)}
+										onClick={() => setShowPassword2(!showPassword2)}
 										className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
 									>
-										{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+										{showPassword2 ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
 									</button>
 								</div>
 							</div>
@@ -121,12 +122,12 @@ export default function RegisterPage() {
 							<Button
 								className="w-full h-12 text-white text-base font-medium"
 								style={{
-									background: "linear-gradient(to right, #8B2CF5, #9747FF)",
+									background: "linear-gradient(90deg, #4F0094, #920072)",
 									border: "none",
 									borderRadius: "8px",
 								}}
 							>
-								Login
+								Register
 							</Button>
 
 						</div>
