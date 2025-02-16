@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-import backgroundImage from "@/assets/images/login.png"
 import logoImage from "@/assets/images/logo.png"
+import Iridescence from "@/components/ui/iridescence"
 
 export default function RegisterPage() {
 	const [showPassword1, setShowPassword1] = useState(false)
@@ -16,19 +16,15 @@ export default function RegisterPage() {
 
 	return (
 		<main className="min-h-screen w-full relative bg-[#0D0D0D] overflow-hidden">
-			{/* Background Image */}
-			<div
-				className="absolute inset-0"
-				style={{
-					backgroundImage: `url(${backgroundImage})`,
-					backgroundSize: "cover",
-					backgroundPosition: "center",
-					backgroundRepeat: "no-repeat",
-					width: "100vw",
-					height: "100vh",
-					position: "fixed",
-				}}
-			/>
+			{/* Animated Background */}
+			<div className="absolute inset-0">
+				<Iridescence
+					color={[0.2, 0, 0.3]} // Darker purple
+					speed={0.5}
+					amplitude={0.2}
+					mouseReact={true}
+				/>
+			</div>
 
 			{/* Logo */}
 			<div className="relative z-10 p-6">
@@ -52,8 +48,8 @@ export default function RegisterPage() {
 						</div>
 
 						<div className="space-y-4">
-							
-						<div className="space-y-2">
+
+							<div className="space-y-2">
 								<Label htmlFor="email" className="text-white">
 									Email
 								</Label>
@@ -64,7 +60,7 @@ export default function RegisterPage() {
 								/>
 							</div>
 
-							
+
 							<div className="space-y-2">
 								<Label htmlFor="username" className="text-white">
 									Username
@@ -75,7 +71,7 @@ export default function RegisterPage() {
 									className="bg-white border-0 text-black placeholder:text-gray-500 h-12"
 								/>
 							</div>
-							
+
 							<div className="space-y-2">
 								<Label htmlFor="password" className="text-white">
 									Password
@@ -118,7 +114,7 @@ export default function RegisterPage() {
 								</div>
 							</div>
 
-							
+
 							<Button
 								className="w-full h-12 text-white text-base font-medium"
 								style={{

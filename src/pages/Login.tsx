@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import Iridescence from "@/components/ui/iridescence"
 
-import backgroundImage from "@/assets/images/login.png"
 import logoImage from "@/assets/images/logo.png"
 
 export default function LoginPage() {
@@ -16,19 +16,15 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen w-full relative bg-[#0D0D0D] overflow-hidden">
-      {/* Background Image */}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `url(${backgroundImage})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          width: "100vw",
-          height: "100vh",
-          position: "fixed",
-        }}
-      />
+      {/* Animated Background */}
+      <div className="absolute inset-0">
+        <Iridescence
+          color={[0.2, 0, 0.3]} // Darker purple
+          speed={0.5}
+          amplitude={0.2}
+          mouseReact={true}
+        />
+      </div>
 
       {/* Logo */}
       <div className="relative z-10 p-6">
@@ -40,7 +36,7 @@ export default function LoginPage() {
         <div
           className="w-full max-w-[400px] p-8 rounded-2xl backdrop-blur-xl border border-white/20"
           style={{
-            background: "linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)",
+            background: "linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%)",
             boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
           }}
         >
