@@ -20,7 +20,7 @@ export default function LoginPage() {
       <div className="absolute inset-0">
         <Iridescence
           color={[0.2, 0, 0.3]} // Darker purple
-          speed={0.5}
+          speed={0.7}
           amplitude={0.2}
           mouseReact={true}
         />
