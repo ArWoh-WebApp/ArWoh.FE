@@ -6,14 +6,14 @@ import Login from "./pages/Login"
 import Register from "./pages/Register"
 import NotFound from "./pages/NotFound"
 import Footer from "./components/Footer"
+import Home from "./pages/Home"
 
 // Define valid routes
 const validRoutes = [
 	"/",
 	"/login",
 	"/register",
-	"/about",
-	"/NotFound",
+	"/not-found",
 ]
 
 const AppContent: React.FC = () => {
@@ -27,6 +27,7 @@ const AppContent: React.FC = () => {
 			{showHeaderFooter && <Header />}
 			<main className="flex-1">
 					<Routes location={location}>
+						<Route path="/" element={<Home />} />
 						<Route path="/login" element={<Login />} />
 						<Route path="/register" element={<Register />} />
 
