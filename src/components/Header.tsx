@@ -25,7 +25,7 @@ export default function Header() {
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>
-							<DropdownMenuItem>Downloads</DropdownMenuItem>
+							<DropdownMenuItem>Printing</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
 
