@@ -7,6 +7,8 @@ import Register from "./pages/Register"
 import NotFound from "./pages/NotFound"
 import Footer from "./components/Footer"
 import Home from "./pages/Home"
+import { AnimatePresence } from "framer-motion"
+import PageTransition from "./components/animations/PageTransition"
 
 // Define valid routes
 const validRoutes = [
@@ -26,18 +28,22 @@ const AppContent: React.FC = () => {
 		<div className="min-h-screen flex flex-col">
 			{showHeaderFooter && <Header />}
 			<main className="flex-1">
-					<Routes location={location}>
-						<Route path="/" element={<Home />} />
-						<Route path="/login" element={<Login />} />
-						<Route path="/register" element={<Register />} />
+				<AnimatePresence mode="wait">
+					<PageTransition key={location.pathname}>
+						<Routes location={location}>
+							<Route path="/" element={<Home />} />
+							<Route path="/login" element={<Login />} />
+							<Route path="/register" element={<Register />} />
 
-						{/* Protected routes */}
+							{/* Protected routes */}
 
-						{/* 404 Page*/}
-						<Route path="*" element={<NotFound />} />
-					</Routes>
+							{/* 404 Page*/}
+							<Route path="*" element={<NotFound />} />
+						</Routes>
+					</PageTransition>
+				</AnimatePresence>
 			</main>
-			{showHeaderFooter && <Footer/>}
+			{showHeaderFooter && <Footer />}
 		</div>
 	)
 }

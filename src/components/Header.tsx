@@ -25,8 +25,7 @@ export default function Header() {
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>
-							<DropdownMenuItem>Option 1</DropdownMenuItem>
-							<DropdownMenuItem>Option 2</DropdownMenuItem>
+							<DropdownMenuItem>Downloads</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
 
@@ -37,20 +36,8 @@ export default function Header() {
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>
-							<DropdownMenuItem>Option 1</DropdownMenuItem>
-							<DropdownMenuItem>Option 2</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
-
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" className="text-white">
-								Connect <ChevronDown className="ml-2 h-4 w-4" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent>
-							<DropdownMenuItem>Option 1</DropdownMenuItem>
-							<DropdownMenuItem>Option 2</DropdownMenuItem>
+							<DropdownMenuItem>Portfolio</DropdownMenuItem>
+							<DropdownMenuItem>Story of Art</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
 
