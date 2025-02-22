@@ -1,7 +1,6 @@
 import type React from "react"
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom"
 import Header from "./components/Header"
-//import Home from "./pages/Home"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
 import NotFound from "./pages/NotFound"
@@ -10,6 +9,8 @@ import Home from "./pages/Home"
 import { AnimatePresence } from "framer-motion"
 import PageTransition from "./components/animations/PageTransition"
 import ArtworkList from "./pages/ArtworkList"
+import { Toaster } from "./components/ui/sonner"
+import UserProfile from "./pages/UserProfile"
 
 // Define valid routes
 const validRoutes = [
@@ -17,6 +18,7 @@ const validRoutes = [
 	"/login",
 	"/register",
 	"/art-gallery",
+	"/user-profile",
 	"/not-found",
 ]
 
@@ -37,6 +39,7 @@ const AppContent: React.FC = () => {
 							<Route path="/login" element={<Login />} />
 							<Route path="/register" element={<Register />} />
 							<Route path="/art-gallery" element={<ArtworkList />} />
+							<Route path="/user-profile" element={<UserProfile />} />
 
 							{/* Protected routes */}
 
@@ -53,11 +56,13 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
 	return (
-		<Router>
-			<AppContent />
-		</Router>
+		<>
+			<Router>
+				<AppContent />
+			</Router>
+			<Toaster />
+		</>
 	)
 }
 
 export default App
-
