@@ -1,134 +1,49 @@
 "use client"
 
 import { useState } from "react"
-import { Heart, Plus, Download } from "lucide-react"
+import { Heart, Plus, Download, ChevronLeft, ChevronRight, Share2, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { artworks } from "@/mock/artwork"
+import type { Artwork } from "@/mock/artworkInterface"
 
 type Orientation = "all" | "landscape" | "portrait"
 
-interface Artwork {
-	id: string
-	src: string
-	orientation: "landscape" | "portrait"
-	tags: string[]
-	user: {
-		name: string
-		avatar: string
-	}
-}
-
-
-// Sample data - replace with your actual data
-const artworks: Artwork[] = [
-	{
-		id: "1",
-		src: "https://images.unsplash.com/photo-1548679847-1d4ff48016c7?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		orientation: "landscape",
-		tags: ["Water Stream", "Brook", "Natural Water"],
-		user: {
-			name: "Alex Smith",
-			avatar: "https://images.unsplash.com/photo-1739624079957-917135a9c545?q=80&w=1752&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		},
-	},
-	{
-		id: "2",
-		src: "https://images.unsplash.com/photo-1487621167305-5d248087c724?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		orientation: "landscape",
-		tags: ["Water Stream", "Brook", "Natural Water"],
-		user: {
-			name: "Alex Smith",
-			avatar: "https://images.unsplash.com/photo-1738363436272-f191888a398b?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		},
-	},
-	{
-		id: "3",
-		src: "https://plus.unsplash.com/premium_photo-1673631128794-e9758e20e5a8?q=80&w=1888&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		orientation: "portrait",
-		tags: ["Water Stream", "Brook", "Natural Water"],
-		user: {
-			name: "Alex Smith",
-			avatar: "https://images.unsplash.com/photo-1738363436272-f191888a398b?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		},
-	},
-	{
-		id: "4",
-		src: "https://images.unsplash.com/photo-1509943089014-50b4f4edfbbb?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		orientation: "landscape",
-		tags: ["Water Stream", "Brook", "Natural Water"],
-		user: {
-			name: "Alex Smith",
-			avatar: "https://images.unsplash.com/photo-1738363436272-f191888a398b?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		},
-	},
-	{
-		id: "5",
-		src: "https://images.unsplash.com/photo-1502635994848-2eb3b4a38201?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		orientation: "portrait",
-		tags: ["Water Stream", "Brook", "Natural Water"],
-		user: {
-			name: "Alex Smith",
-			avatar: "https://images.unsplash.com/photo-1738363436272-f191888a398b?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		},
-	},
-	{
-		id: "6",
-		src: "https://images.unsplash.com/photo-1503348379917-758650634df4?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		orientation: "portrait",
-		tags: ["Water Stream", "Brook", "Natural Water"],
-		user: {
-			name: "Alex Smith",
-			avatar: "https://images.unsplash.com/photo-1738363436272-f191888a398b?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		},
-	},
-	{
-		id: "7",
-		src: "https://images.unsplash.com/photo-1595246965570-9684145def50?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		orientation: "portrait",
-		tags: ["Water Stream", "Brook", "Natural Water"],
-		user: {
-			name: "Alex Smith",
-			avatar: "https://images.unsplash.com/photo-1738363436272-f191888a398b?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		},
-	},
-	{
-		id: "8",
-		src: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		orientation: "landscape",
-		tags: ["Water Stream", "Brook", "Natural Water"],
-		user: {
-			name: "Alex Smith",
-			avatar: "https://images.unsplash.com/photo-1738363436272-f191888a398b?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		},
-	},
-	{
-		id: "9",
-		src: "https://images.unsplash.com/photo-1474767821094-a8fe9d8c8fdd?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		orientation: "landscape",
-		tags: ["Water Stream", "Brook", "Natural Water"],
-		user: {
-			name: "Alex Smith",
-			avatar: "https://images.unsplash.com/photo-1738363436272-f191888a398b?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		},
-	},
-	{
-		id: "10",
-		src: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		orientation: "portrait",
-		tags: ["Water Stream", "Brook", "Natural Water"],
-		user: {
-			name: "Alex Smith",
-			avatar: "https://images.unsplash.com/photo-1738363436272-f191888a398b?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-		},
-	},
-]
-
 export default function ArtworkList() {
 	const [orientation, setOrientation] = useState<Orientation>("all")
+	const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null)
 
 	const filteredArtworks = artworks.filter((artwork) => {
 		if (orientation === "all") return true
 		return artwork.orientation === orientation
 	})
+
+	const handleArtworkClick = (artwork: Artwork) => {
+		setSelectedArtwork(artwork)
+		document.body.style.overflow = "hidden"
+	}
+
+	const handleCloseDetail = () => {
+		setSelectedArtwork(null)
+		document.body.style.overflow = "auto"
+	}
+
+	const handlePrevious = () => {
+		const currentIndex = artworks.findIndex((a) => a.id === selectedArtwork?.id)
+		if (currentIndex > 0) {
+			const prevArtwork = artworks[currentIndex - 1]
+			setSelectedArtwork(null)
+			setTimeout(() => setSelectedArtwork(prevArtwork), 150)
+		}
+	}
+
+	const handleNext = () => {
+		const currentIndex = artworks.findIndex((a) => a.id === selectedArtwork?.id)
+		if (currentIndex < artworks.length - 1) {
+			const nextArtwork = artworks[currentIndex + 1]
+			setSelectedArtwork(null)
+			setTimeout(() => setSelectedArtwork(nextArtwork), 150)
+		}
+	}
 
 	return (
 		<div className="space-y-6">
@@ -151,32 +66,120 @@ export default function ArtworkList() {
 			{/* Artwork Grid */}
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[200px]">
 				{filteredArtworks.map((artwork) => (
-					<ArtworkCard key={artwork.id} artwork={artwork} />
+					<ArtworkCard key={artwork.id} artwork={artwork} onClick={() => handleArtworkClick(artwork)} />
 				))}
+			</div>
+
+			{/* Artwork Detail Modal */}
+			<div
+				className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300 ${selectedArtwork ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+					}`}
+			>
+				<div
+					className={`bg-black p-8 rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto transform transition-transform duration-300 ${selectedArtwork ? "scale-100" : "scale-95"
+						}`}
+				>
+					<button onClick={handleCloseDetail} className="absolute top-4 right-4 text-white">
+						<X />
+					</button>
+					{selectedArtwork && (
+						<div className="flex flex-col md:flex-row gap-8">
+							<div className="md:w-2/3 relative">
+								<img
+									src={selectedArtwork.src || "/placeholder.svg"}
+									alt={selectedArtwork.title}
+									className="w-full h-auto rounded-lg transition-opacity duration-300"
+									key={selectedArtwork.id}
+								/>
+								<button
+									onClick={handlePrevious}
+									className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 rounded-full transition-transform duration-300 hover:scale-110"
+								>
+									<ChevronLeft className="text-white" />
+								</button>
+								<button
+									onClick={handleNext}
+									className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 rounded-full transition-transform duration-300 hover:scale-110"
+								>
+									<ChevronRight className="text-white" />
+								</button>
+							</div>
+							<div className="md:w-1/3 text-white">
+								<h2 className="text-2xl font-bold mb-4">{selectedArtwork.title}</h2>
+								<div className="flex items-center mb-4">
+									<img
+										src={selectedArtwork.user.avatar || "/placeholder.svg"}
+										alt={selectedArtwork.user.name}
+										className="w-10 h-10 rounded-full mr-3"
+									/>
+									<div>
+										<p className="font-semibold">{selectedArtwork.user.name}</p>
+										<p className="text-sm text-gray-400">{selectedArtwork.user.role}</p>
+									</div>
+								</div>
+								<p className="mb-4">{selectedArtwork.description}</p>
+								<p className="text-sm text-gray-400 mb-2">Location: {selectedArtwork.location}</p>
+								<p className="text-sm text-gray-400 mb-4">
+									Uploaded: {new Date(selectedArtwork.uploadDate).toLocaleDateString()}
+								</p>
+								{selectedArtwork.camera && (
+									<div className="mb-4">
+										<p className="text-sm text-gray-400">Camera: {selectedArtwork.camera.model}</p>
+										<p className="text-sm text-gray-400">Settings: {selectedArtwork.camera.settings}</p>
+									</div>
+								)}
+								<div className="flex flex-wrap gap-2 mb-4">
+									{selectedArtwork.tags.map((tag) => (
+										<span key={tag} className="px-2 py-1 bg-gray-800 rounded-full text-xs">
+											{tag}
+										</span>
+									))}
+								</div>
+								<button className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-lg">
+									<Share2 size={16} />
+									Share
+								</button>
+							</div>
+						</div>
+					)}
+				</div>
 			</div>
 		</div>
 	)
 }
 
-function ArtworkCard({ artwork }: { artwork: Artwork }) {
+function ArtworkCard({ artwork, onClick }: { artwork: Artwork; onClick: () => void }) {
 	return (
 		<div
+			onClick={onClick}
 			className={cn(
-				"relative group rounded-lg overflow-hidden",
+				"relative group rounded-lg overflow-hidden cursor-pointer",
 				artwork.orientation === "portrait" ? "row-span-2" : "row-span-1",
 			)}
 		>
 			{/* Image */}
-			<img src={artwork.src || "/placeholder.svg"} alt="" className="w-full h-full object-cover" />
+			<img src={artwork.src || "/placeholder.svg"} alt={artwork.title} className="w-full h-full object-cover" />
 
 			{/* Overlay */}
 			<div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300">
 				{/* Top Actions */}
 				<div className="absolute top-4 right-4 flex gap-2">
-					<button className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors">
+					<button
+						className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
+						onClick={(e) => {
+							e.stopPropagation()
+							// Handle like
+						}}
+					>
 						<Heart className="w-4 h-4 text-white" />
 					</button>
-					<button className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors">
+					<button
+						className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
+						onClick={(e) => {
+							e.stopPropagation()
+							// Handle add to collection
+						}}
+					>
 						<Plus className="w-4 h-4 text-white" />
 					</button>
 				</div>
@@ -192,15 +195,21 @@ function ArtworkCard({ artwork }: { artwork: Artwork }) {
 				</div>
 
 				{/* Download Button */}
-				<button className="absolute bottom-4 right-4 p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors">
+				<button
+					className="absolute bottom-4 right-4 p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
+					onClick={(e) => {
+						e.stopPropagation()
+						// Handle download
+					}}
+				>
 					<Download className="w-4 h-4 text-white" />
 				</button>
 			</div>
 
-			{/* Tags - Now with transition and opacity change on group hover */}
+			{/* Tags */}
 			<div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-100 group-hover:opacity-0 transition-all duration-300">
 				<div className="flex flex-wrap gap-2">
-					{artwork.tags.map((tag) => (
+					{artwork.tags.slice(0, 3).map((tag) => (
 						<span key={tag} className="px-2 py-1 rounded-lg bg-white/20 text-white text-xs">
 							{tag}
 						</span>

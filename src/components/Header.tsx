@@ -13,7 +13,7 @@ export default function Header() {
 			<div className="max-w-[1400px] mx-auto flex items-center justify-between">
 				{/* Logo */}
 				<div className="flex-shrink-0">
-					<img src={logoImage || "/placeholder.svg"} alt="ArtWoh" className="h-6" />
+					<img src={logoImage || "/placeholder.svg"} alt="ArWoh" className="h-6" />
 				</div>
 
 				{/* Navigation */}
