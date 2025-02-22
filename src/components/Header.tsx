@@ -13,7 +13,9 @@ export default function Header() {
 			<div className="max-w-[1400px] mx-auto flex items-center justify-between">
 				{/* Logo */}
 				<div className="flex-shrink-0">
-					<img src={logoImage || "/placeholder.svg"} alt="ArWoh" className="h-6" />
+					<Button variant="link">
+						<img src={logoImage || "/placeholder.svg"} alt="ArWoh" className="h-6" onClick={() => navigate("/")} />
+					</Button>
 				</div>
 
 				{/* Navigation */}
@@ -25,7 +27,7 @@ export default function Header() {
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>
-							<DropdownMenuItem onClick={() => navigate("/art-gallery")}>Art Gallery</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => navigate("/art-gallery")}>Photo Gallery</DropdownMenuItem>
 							<DropdownMenuItem>Printing</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>

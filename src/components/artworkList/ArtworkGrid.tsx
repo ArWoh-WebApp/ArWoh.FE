@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Heart, Plus, Download, ChevronLeft, ChevronRight, Share2, X } from "lucide-react"
+import { Heart, Plus, ChevronLeft, ChevronRight, Share2, X, ShoppingCart } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { artworks } from "@/mock/artwork"
 import type { Artwork } from "@/mock/artworkInterface"
@@ -109,16 +109,19 @@ export default function ArtworkList() {
 							</div>
 							<div className="md:w-1/3 h-full overflow-y-auto text-white pr-4">
 								<h2 className="text-2xl font-bold mb-4">{selectedArtwork.title}</h2>
-								<div className="flex items-center mb-4">
-									<img
-										src={selectedArtwork.user.avatar || "/placeholder.svg"}
-										alt={selectedArtwork.user.name}
-										className="w-10 h-10 rounded-full mr-3"
-									/>
-									<div>
-										<p className="font-semibold">{selectedArtwork.user.name}</p>
-										<p className="text-sm text-gray-400">{selectedArtwork.user.role}</p>
+								<div className="flex items-center justify-between mb-4">
+									<div className="flex items-center">
+										<img
+											src={selectedArtwork.user.avatar || "/placeholder.svg"}
+											alt={selectedArtwork.user.name}
+											className="w-10 h-10 rounded-full mr-3"
+										/>
+										<div>
+											<p className="font-semibold">{selectedArtwork.user.name}</p>
+											<p className="text-sm text-gray-400">{selectedArtwork.user.role}</p>
+										</div>
 									</div>
+									<p className="text-xl font-bold">{selectedArtwork.price.toLocaleString("vi-VN")} ₫</p>
 								</div>
 								<p className="mb-4">{selectedArtwork.description}</p>
 								<p className="text-sm text-gray-400 mb-2">Location: {selectedArtwork.location}</p>
@@ -138,10 +141,16 @@ export default function ArtworkList() {
 										</span>
 									))}
 								</div>
-								<button className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-lg">
-									<Share2 size={16} />
-									Share
-								</button>
+								<div className="flex items-center gap-4 mt-6">
+									<button className="flex-1 flex items-center justify-center gap-2 bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+										<ShoppingCart size={16} />
+										Add to Cart
+									</button>
+									<button className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+										<Share2 size={16} />
+										Share
+									</button>
+								</div>
 							</div>
 						</div>
 					)}
@@ -197,16 +206,10 @@ function ArtworkCard({ artwork, onClick }: { artwork: Artwork; onClick: () => vo
 					<span className="text-white text-sm font-medium">{artwork.user.name}</span>
 				</div>
 
-				{/* Download Button */}
-				<button
-					className="absolute bottom-4 right-4 p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
-					onClick={(e) => {
-						e.stopPropagation()
-						// Handle download
-					}}
-				>
-					<Download className="w-4 h-4 text-white" />
-				</button>
+				{/* Price */}
+				<div className="absolute bottom-4 right-4 bg-black/60 px-2 py-1 rounded">
+					<span className="text-white text-sm font-medium">{artwork.price.toLocaleString("vi-VN")} ₫</span>
+				</div>
 			</div>
 
 			{/* Tags */}

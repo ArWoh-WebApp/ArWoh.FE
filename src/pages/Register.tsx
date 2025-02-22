@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import Iridescence from "@/components/ui/iridescence"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 import logoImage from "@/assets/images/logo.png"
 
@@ -62,9 +63,23 @@ export default function RegisterPage() {
 						</div>
 						<LabelInputContainer className="mb-4">
 							<Label className="text-white" htmlFor="email">
-								Email
+								Email Address
 							</Label>
 							<Input id="email" placeholder="projectmayhem@fc.com" type="email" />
+						</LabelInputContainer>
+						<LabelInputContainer className="mb-4">
+							<Label className="text-white" htmlFor="role">
+								Role
+							</Label>
+							<Select>
+								<SelectTrigger id="role" className="bg-white border-0 text-black placeholder:text-gray-500 h-10">
+									<SelectValue placeholder="Select your role" />
+								</SelectTrigger>
+								<SelectContent className="bg-white text-black">
+									<SelectItem value="customer">Customer</SelectItem>
+									<SelectItem value="photographer">Photographer</SelectItem>
+								</SelectContent>
+							</Select>
 						</LabelInputContainer>
 						<LabelInputContainer className="mb-4">
 							<Label className="text-white" htmlFor="password">
