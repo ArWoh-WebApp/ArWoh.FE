@@ -1,4 +1,7 @@
-import collectionImg from "@/assets/images/collectionSection.png"
+import { ThreeDCard } from "@/components/ui/3d-card"
+
+const collectionImg =
+	"https://minio.ae-tao-fullstack-api.site/api/v1/buckets/arwoh-bucket/objects/download?preview=true&prefix=landingPage%2Fjun-kim-2.jpg&version_id=null"
 
 export default function CollectionShowcase() {
 	return (
@@ -21,16 +24,17 @@ export default function CollectionShowcase() {
 						</div>
 					</div>
 
-					{/* Image */}
-					<div className="relative aspect-square">
-						<div className="absolute inset-0 rounded-3xl">
+					{/* Image with 3D effect */}
+					<ThreeDCard className="relative aspect-square w-full h-full">
+						<div className="absolute inset-0 rounded-3xl overflow-hidden">
 							<img
-								src={collectionImg}
+								src={collectionImg || "/placeholder.svg"}
 								alt="Artwork Collection"
-								className="w-full h-full object-contain rounded-3xl"
+								className="w-full h-full object-contain rounded-3xl transition-transform duration-500 ease-in-out transform hover:scale-110"
 							/>
 						</div>
-					</div>
+						<div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-purple-600/20 to-transparent pointer-events-none" />
+					</ThreeDCard>
 				</div>
 			</div>
 		</section>

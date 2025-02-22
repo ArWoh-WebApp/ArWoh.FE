@@ -9,12 +9,14 @@ import Footer from "./components/Footer"
 import Home from "./pages/Home"
 import { AnimatePresence } from "framer-motion"
 import PageTransition from "./components/animations/PageTransition"
+import ArtworkList from "./pages/ArtworkList"
 
 // Define valid routes
 const validRoutes = [
 	"/",
 	"/login",
 	"/register",
+	"/artwork-list",
 	"/not-found",
 ]
 
@@ -34,6 +36,7 @@ const AppContent: React.FC = () => {
 							<Route path="/" element={<Home />} />
 							<Route path="/login" element={<Login />} />
 							<Route path="/register" element={<Register />} />
+							<Route path="/artwork-list" element={<ArtworkList />} />
 
 							{/* Protected routes */}
 
