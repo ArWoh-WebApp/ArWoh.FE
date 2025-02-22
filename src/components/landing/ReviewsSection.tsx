@@ -80,28 +80,4 @@ export default function ReviewsSection() {
 	)
 }
 
-const ReviewCard = ({ review }: { review: (typeof reviews)[number] }) => (
-	<div className="w-[350px] h-[200px] p-6 rounded-2xl border border-purple-600/30 space-y-4 bg-black">
-		<div className="flex gap-1">
-			{[...Array(5)].map((_, i) => (
-				<Star
-					key={i}
-					className={`w-5 h-5 ${i < review.rating ? "text-purple-600 fill-purple-600" : "text-gray-600"}`}
-				/>
-			))}
-		</div>
-		<p className="text-white">"{review.text}"</p>
-		<div className="flex items-center gap-3">
-			<img
-				src={review.avatar || "/placeholder.svg"}
-				alt={review.author}
-				className="w-10 h-10 rounded-full object-cover bg-gray-800"
-			/>
-			<div>
-				<p className="font-medium">{review.author}</p>
-				<p className="text-sm text-gray-400">{review.role}</p>
-			</div>
-		</div>
-	</div>
-)
 

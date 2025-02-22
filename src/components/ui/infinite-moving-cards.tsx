@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { cn } from "@/lib/utils"
@@ -83,7 +82,7 @@ export const InfiniteMovingCards = ({
           pauseOnHover && "hover:[animation-play-state:paused]",
         )}
       >
-        {items.map((item, idx) => (
+        {items.map((item) => (
           <li key={item.author} className="w-[350px] max-w-full relative flex-shrink-0">
             <div className="h-[200px] w-full p-6 rounded-2xl border border-purple-600/30 space-y-4 bg-black">
               <div className="flex gap-1">
