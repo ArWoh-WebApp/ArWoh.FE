@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards"
-import { Star } from "lucide-react"
 import userAvt from "@/assets/images/user.png"
 
 const reviews = [
