@@ -16,7 +16,7 @@ const validRoutes = [
 	"/",
 	"/login",
 	"/register",
-	"/artwork-list",
+	"/art-gallery",
 	"/not-found",
 ]
 
@@ -36,7 +36,7 @@ const AppContent: React.FC = () => {
 							<Route path="/" element={<Home />} />
 							<Route path="/login" element={<Login />} />
 							<Route path="/register" element={<Register />} />
-							<Route path="/artwork-list" element={<ArtworkList />} />
+							<Route path="/art-gallery" element={<ArtworkList />} />
 
 							{/* Protected routes */}
 

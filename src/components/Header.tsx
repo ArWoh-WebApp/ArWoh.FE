@@ -25,7 +25,8 @@ export default function Header() {
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>
-							<DropdownMenuItem onClick={() => navigate("/artwork-list")}>List of Artwork</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => navigate("/art-gallery")}>Art Gallery</DropdownMenuItem>
+							<DropdownMenuItem>Printing</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
 
