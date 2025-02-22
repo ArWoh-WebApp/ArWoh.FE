@@ -76,19 +76,22 @@ export default function ArtworkList() {
 					}`}
 			>
 				<div
-					className={`bg-black p-8 rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto transform transition-transform duration-300 ${selectedArtwork ? "scale-100" : "scale-95"
+					className={`bg-black rounded-lg w-[95vw] h-[90vh] flex items-center transform transition-transform duration-300 ${selectedArtwork ? "scale-100" : "scale-95"
 						}`}
 				>
 					<button onClick={handleCloseDetail} className="absolute top-4 right-4 text-white">
 						<X />
 					</button>
 					{selectedArtwork && (
-						<div className="flex flex-col md:flex-row gap-8">
-							<div className="md:w-2/3 relative">
+						<div className="flex flex-col md:flex-row h-full w-full p-4 gap-8">
+							<div className="md:w-2/3 relative h-full flex items-center justify-center">
 								<img
 									src={selectedArtwork.src || "/placeholder.svg"}
 									alt={selectedArtwork.title}
-									className="w-full h-auto rounded-lg transition-opacity duration-300"
+									className={cn(
+										"transition-opacity duration-300 rounded-lg",
+										selectedArtwork.orientation === "portrait" ? "h-full w-auto" : "w-full h-auto max-h-full",
+									)}
 									key={selectedArtwork.id}
 								/>
 								<button
@@ -104,7 +107,7 @@ export default function ArtworkList() {
 									<ChevronRight className="text-white" />
 								</button>
 							</div>
-							<div className="md:w-1/3 text-white">
+							<div className="md:w-1/3 h-full overflow-y-auto text-white pr-4">
 								<h2 className="text-2xl font-bold mb-4">{selectedArtwork.title}</h2>
 								<div className="flex items-center mb-4">
 									<img
