@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 
-import aba from "@/assets/images/aba.png"
+import userAvt from "@/assets/images/user.png"
 
 export default function UserProfile() {
 
@@ -39,7 +39,7 @@ export default function UserProfile() {
 							<div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full p-[2px]">
 								<div className="absolute inset-0 bg-black rounded-full m-[1px]" />
 								<img
-									src={aba}
+									src={userAvt}
 									alt="Profile"
 									className="relative w-full h-full object-cover rounded-full"
 								/>
