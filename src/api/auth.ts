@@ -2,23 +2,34 @@
 import axiosInstance from "./axiosInstance";
 
 const LOGIN_API = "/auth/login"
-const REGISTER_API = "/auth/register"
+const REGISTER_CUSTOMER_API = "/auth/register/customer"
+const REGISTER_PHOTOGRAPHER_API = "/auth/register/photographer"
 
 export namespace Auth {
 
-    //REGISTER
-    //Payload gửi đi tới API
+    //REGISTER - Customer
     export interface RegisterPayload {
-        email: string;
-        password: string;
+        username: string
+        email: string
+        password: string
     }
-    //User data - register response trả về
+
+    // User data - register response
     export interface RegisterResponseData {
-        userId: number;
-        email: string;
-        fullname: string | null
+        username: string
+        email: string
+        passwordHash: string
+        role: "Customer" | "Photographer"
+        bio: string
+        profilePictureUrl: string
+        images: null
+        transactions: null
+        id: number
+        createdAt: string
+        updatedAt: string | null
+        isDeleted: boolean
+        deletedAt: string | null
     }
-    //Response: API trả về
     export interface RegisterResponse {
         isSuccess: boolean;
         message: string;
@@ -48,8 +59,13 @@ export namespace Auth {
         return response.data;
     }
 
-    export async function register(payload: RegisterPayload): Promise<RegisterResponse> {
-        const response = await axiosInstance.post<RegisterResponse>(REGISTER_API, payload,);
+    export async function registerCustomer(payload: RegisterPayload): Promise<RegisterResponse> {
+        const response = await axiosInstance.post<RegisterResponse>(REGISTER_CUSTOMER_API, payload,);
+        return response.data;
+    }
+
+    export async function registerPhotographer(payload: RegisterPayload): Promise<RegisterResponse> {
+        const response = await axiosInstance.post<RegisterResponse>(REGISTER_PHOTOGRAPHER_API, payload,);
         return response.data;
     }
 

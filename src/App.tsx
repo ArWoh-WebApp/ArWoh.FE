@@ -11,6 +11,8 @@ import PageTransition from "./components/animations/PageTransition"
 import ArtworkList from "./pages/ArtworkList"
 import { Toaster } from "./components/ui/sonner"
 import UserProfile from "./pages/UserProfile"
+import { CartProvider } from "./contexts/CardContext"
+import { CartDrawer } from "./components/cart/CartDrawer"
 
 // Define valid routes
 const validRoutes = [
@@ -57,10 +59,13 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
 	return (
 		<>
-			<Router>
-				<AppContent />
-			</Router>
-			<Toaster />
+			<CartProvider>
+				<Router>
+					<AppContent />
+				</Router>
+				<CartDrawer />
+				<Toaster />
+			</CartProvider>
 		</>
 	)
 }

@@ -1,16 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { Heart, Plus, ChevronLeft, ChevronRight, Share2, X, ShoppingCart } from "lucide-react"
+import { Heart, Plus, ChevronLeft, ChevronRight, Share2, X, ShoppingCart, Minus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { artworks } from "@/mock/artwork"
 import type { Artwork } from "@/mock/artworkInterface"
+import { useCart } from "@/contexts/CardContext"
+import { toast } from "sonner"
 
 type Orientation = "all" | "landscape" | "portrait"
 
 export default function ArtworkList() {
 	const [orientation, setOrientation] = useState<Orientation>("all")
 	const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null)
+	const [quantity, setQuantity] = useState(1)
+	const { addItem } = useCart()
 
 	const filteredArtworks = artworks.filter((artwork) => {
 		if (orientation === "all") return true
@@ -19,6 +23,7 @@ export default function ArtworkList() {
 
 	const handleArtworkClick = (artwork: Artwork) => {
 		setSelectedArtwork(artwork)
+		setQuantity(1) // Reset quantity when opening new artwork
 		document.body.style.overflow = "hidden"
 	}
 
@@ -32,7 +37,10 @@ export default function ArtworkList() {
 		if (currentIndex > 0) {
 			const prevArtwork = artworks[currentIndex - 1]
 			setSelectedArtwork(null)
-			setTimeout(() => setSelectedArtwork(prevArtwork), 150)
+			setTimeout(() => {
+				setSelectedArtwork(prevArtwork)
+				setQuantity(1) // Reset quantity when changing artwork
+			}, 150)
 		}
 	}
 
@@ -41,7 +49,17 @@ export default function ArtworkList() {
 		if (currentIndex < artworks.length - 1) {
 			const nextArtwork = artworks[currentIndex + 1]
 			setSelectedArtwork(null)
-			setTimeout(() => setSelectedArtwork(nextArtwork), 150)
+			setTimeout(() => {
+				setSelectedArtwork(nextArtwork)
+				setQuantity(1) // Reset quantity when changing artwork
+			}, 150)
+		}
+	}
+
+	const handleAddToCart = () => {
+		if (selectedArtwork) {
+			addItem(selectedArtwork, quantity)
+			toast.success("Added to cart!")
 		}
 	}
 
@@ -142,7 +160,25 @@ export default function ArtworkList() {
 									))}
 								</div>
 								<div className="flex items-center gap-4 mt-6">
-									<button className="flex-1 flex items-center justify-center gap-2 bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+									<div className="flex items-center gap-2 bg-white/10 rounded-lg p-2">
+										<button
+											onClick={() => setQuantity(Math.max(1, quantity - 1))}
+											className="p-1 rounded-full hover:bg-white/10 transition-colors"
+										>
+											<Minus className="w-4 h-4 text-white" />
+										</button>
+										<span className="text-white min-w-[2rem] text-center">{quantity}</span>
+										<button
+											onClick={() => setQuantity(quantity + 1)}
+											className="p-1 rounded-full hover:bg-white/10 transition-colors"
+										>
+											<Plus className="w-4 h-4 text-white" />
+										</button>
+									</div>
+									<button
+										className="flex-1 flex items-center justify-center gap-2 bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+										onClick={handleAddToCart}
+									>
 										<ShoppingCart size={16} />
 										Add to Cart
 									</button>

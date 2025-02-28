@@ -1,7 +1,7 @@
 import axios from "axios"
 
 // Instance to use global - using BaseURL from BE API
-const API_URL = "https://ae-tao-fullstack-api.site/api"
+const API_URL = "http://localhost:9090/api"
 const axiosInstance = axios.create({
     baseURL: API_URL,
     headers: {

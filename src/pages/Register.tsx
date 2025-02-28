@@ -10,23 +10,102 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import Iridescence from "@/components/ui/iridescence"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Auth } from "@/api/auth"
+import { toast } from "sonner"
+import { useNavigate } from "react-router-dom"
 
 import logoImage from "@/assets/images/logo.png"
 
 export default function RegisterPage() {
 	const [showPassword1, setShowPassword1] = useState(false)
 	const [showPassword2, setShowPassword2] = useState(false)
+	const [isLoading, setIsLoading] = useState(false)
+	const navigate = useNavigate()
+
+	// Form state
+	const [formData, setFormData] = useState({
+		username: "",
+		email: "",
+		role: "",
+		password: "",
+		confirmPassword: "",
+	})
+
+	// Handle input changes
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { id, value } = e.target
+		setFormData((prev) => ({
+			...prev,
+			[id]: value,
+		}))
+	}
+
+	// Handle role selection
+	const handleRoleSelect = (value: string) => {
+		setFormData((prev) => ({
+			...prev,
+			role: value,
+		}))
+	}
+
+	// Form submission
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault()
+
+		// Validation
+		if (!formData.email || !formData.password) {
+			toast.error("Please fill in all required fields")
+			return
+		}
+
+		if (formData.password !== formData.confirmPassword) {
+			toast.error("Passwords do not match")
+			return
+		}
+
+		if (!formData.role) {
+			toast.error("Please select a role")
+			return
+		}
+
+		setIsLoading(true)
+
+		try {
+			const payload: Auth.RegisterPayload = {
+				username: formData.username,
+				email: formData.email,
+				password: formData.password,
+			}
+
+			let response: Auth.RegisterResponse
+
+			// Call different APIs based on role
+			if (formData.role.toLowerCase() === "customer") {
+				response = await Auth.registerCustomer(payload)
+			} else {
+				response = await Auth.registerPhotographer(payload)
+			}
+
+			if (response.isSuccess) {
+				toast.success("Registration successful!")
+				// Redirect to login page after successful registration
+				navigate("/login")
+			} else {
+				toast.error(response.message || "Registration failed")
+			}
+		} catch (error) {
+			toast.error("An error occurred during registration")
+			console.error("Registration error:", error)
+		} finally {
+			setIsLoading(false)
+		}
+	}
 
 	return (
 		<main className="min-h-screen w-full relative bg-[#0D0D0D] overflow-hidden">
 			{/* Animated Background */}
 			<div className="absolute inset-0">
-				<Iridescence
-					color={[0.2, 0, 0.3]} // Darker purple
-					speed={0.7}
-					amplitude={0.2}
-					mouseReact={true}
-				/>
+				<Iridescence color={[0.2, 0, 0.3]} speed={0.7} amplitude={0.2} mouseReact={true} />
 			</div>
 
 			{/* Logo */}
@@ -46,47 +125,62 @@ export default function RegisterPage() {
 					<h2 className="font-bold text-xl text-white">Register</h2>
 					<p className="text-gray-300 text-sm max-w-sm mt-2">Create your account.</p>
 
-					<form className="my-8">
+					<form className="my-8" onSubmit={handleSubmit}>
 						<div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
 							<LabelInputContainer>
-								<Label className="text-white" htmlFor="firstname">
-									First name
+								<Label className="text-white" htmlFor="username">
+									Username
 								</Label>
-								<Input id="firstname" placeholder="Tyler" type="text" />
+								<Input
+									id="username"
+									placeholder="Username"
+									type="text"
+									value={formData.username}
+									onChange={handleChange}
+									required
+								/>
 							</LabelInputContainer>
 							<LabelInputContainer>
-								<Label className="text-white" htmlFor="lastname">
-									Last name
+								<Label className="text-white" htmlFor="role">
+									Role
 								</Label>
-								<Input id="lastname" placeholder="Durden" type="text" />
+								<Select value={formData.role} onValueChange={handleRoleSelect}>
+									<SelectTrigger id="role" className="bg-white border-0 text-black placeholder:text-gray-500 h-10">
+										<SelectValue placeholder="Select your role" />
+									</SelectTrigger>
+									<SelectContent className="bg-white text-black">
+										<SelectItem value="customer">Customer</SelectItem>
+										<SelectItem value="photographer">Photographer</SelectItem>
+									</SelectContent>
+								</Select>
 							</LabelInputContainer>
 						</div>
 						<LabelInputContainer className="mb-4">
 							<Label className="text-white" htmlFor="email">
 								Email Address
 							</Label>
-							<Input id="email" placeholder="projectmayhem@fc.com" type="email" />
-						</LabelInputContainer>
-						<LabelInputContainer className="mb-4">
-							<Label className="text-white" htmlFor="role">
-								Role
-							</Label>
-							<Select>
-								<SelectTrigger id="role" className="bg-white border-0 text-black placeholder:text-gray-500 h-10">
-									<SelectValue placeholder="Select your role" />
-								</SelectTrigger>
-								<SelectContent className="bg-white text-black">
-									<SelectItem value="customer">Customer</SelectItem>
-									<SelectItem value="photographer">Photographer</SelectItem>
-								</SelectContent>
-							</Select>
+							<Input
+								id="email"
+								placeholder="projectmayhem@fc.com"
+								type="email"
+								value={formData.email}
+								onChange={handleChange}
+								required
+							/>
 						</LabelInputContainer>
 						<LabelInputContainer className="mb-4">
 							<Label className="text-white" htmlFor="password">
 								Password
 							</Label>
 							<div className="relative">
-								<Input id="password" placeholder="••••••••" type={showPassword1 ? "text" : "password"} />
+								<Input
+									id="password"
+									placeholder="••••••••"
+									type={showPassword1 ? "text" : "password"}
+									value={formData.password}
+									onChange={handleChange}
+									required
+								/>
 								<button
 									type="button"
 									onClick={() => setShowPassword1(!showPassword1)}
@@ -101,7 +195,14 @@ export default function RegisterPage() {
 								Confirm password
 							</Label>
 							<div className="relative">
-								<Input id="confirmPassword" placeholder="••••••••" type={showPassword2 ? "text" : "password"} />
+								<Input
+									id="confirmPassword"
+									placeholder="••••••••"
+									type={showPassword2 ? "text" : "password"}
+									value={formData.confirmPassword}
+									onChange={handleChange}
+									required
+								/>
 								<button
 									type="button"
 									onClick={() => setShowPassword2(!showPassword2)}
@@ -112,14 +213,16 @@ export default function RegisterPage() {
 							</div>
 						</LabelInputContainer>
 						<Button
+							type="submit"
 							className="w-full h-12 text-white text-base font-medium"
 							style={{
 								background: "linear-gradient(90deg, #4F0094, #920072)",
 								border: "none",
 								borderRadius: "8px",
 							}}
+							disabled={isLoading}
 						>
-							Register
+							{isLoading ? "Registering..." : "Register"}
 						</Button>
 					</form>
 					<div className="text-sm text-center text-gray-300 mt-6">
