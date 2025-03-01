@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react"
 import { useCart } from "@/contexts/CardContext"
 import { Button } from "@/components/ui/button"
+import { useLocation } from "react-router-dom"
 
 export function CartDrawer() {
     const { items, isOpen, toggleCart, removeItem, updateQuantity } = useCart()
@@ -15,7 +16,14 @@ export function CartDrawer() {
         setMounted(true)
     }, [])
 
-    if (!mounted) return null
+    const location = useLocation()
+
+    // Ẩn khỏi những routes ko cần show - những page ko cần thì thêm vào
+    const hideOnRoutes = ["/login", "/register"]
+
+    const shouldShow = !hideOnRoutes.includes(location.pathname)
+
+    if (!mounted || !shouldShow) return null
 
     const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
@@ -39,7 +47,12 @@ export function CartDrawer() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            onClick={toggleCart}
+                            onClick={(e) => {
+                                // Chỉ đóng khi click vào backdrop
+                                if (e.target === e.currentTarget) {
+                                    toggleCart()
+                                }
+                            }}
                             className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
                         />
 
