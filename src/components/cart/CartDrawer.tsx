@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react"
 import { useCart } from "@/contexts/CardContext"
@@ -10,17 +10,32 @@ import { useLocation } from "react-router-dom"
 export function CartDrawer() {
     const { items, isOpen, toggleCart, removeItem, updateQuantity } = useCart()
     const [mounted, setMounted] = useState(false)
+    const drawerRef = useRef<HTMLDivElement>(null)
 
     // Handle hydration
     useEffect(() => {
         setMounted(true)
     }, [])
 
+    // Handle clicking outside
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (drawerRef.current && !drawerRef.current.contains(event.target as Node)) {
+                toggleCart()
+            }
+        }
+
+        if (isOpen) {
+            document.addEventListener("mousedown", handleClickOutside)
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside)
+        }
+    }, [isOpen, toggleCart])
+
     const location = useLocation()
-
-    // Ẩn khỏi những routes ko cần show - những page ko cần thì thêm vào
     const hideOnRoutes = ["/login", "/register"]
-
     const shouldShow = !hideOnRoutes.includes(location.pathname)
 
     if (!mounted || !shouldShow) return null
@@ -47,17 +62,12 @@ export function CartDrawer() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            onClick={(e) => {
-                                // Chỉ đóng khi click vào backdrop
-                                if (e.target === e.currentTarget) {
-                                    toggleCart()
-                                }
-                            }}
                             className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
                         />
 
                         {/* Cart Panel */}
                         <motion.div
+                            ref={drawerRef}
                             initial={{ x: "100%" }}
                             animate={{ x: 0 }}
                             exit={{ x: "100%" }}

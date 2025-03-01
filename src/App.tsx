@@ -62,9 +62,9 @@ const App: React.FC = () => {
 			<CartProvider>
 				<Router>
 					<AppContent />
+					<CartDrawer />
+					<Toaster />
 				</Router>
-				<CartDrawer />
-				<Toaster />
 			</CartProvider>
 		</>
 	)

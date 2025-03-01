@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { Label } from "@/components/ui/label"
@@ -9,19 +8,47 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import Iridescence from "@/components/ui/iridescence"
+import { Auth } from "@/api/auth"
+import { toast } from "sonner"
+import { useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 
 import logoImage from "@/assets/images/logo.png"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    try {
+      const response = await Auth.login({ email, password })
+      if (response.isSuccess) {
+        toast.success("Login successful")
+        navigate("/")
+      } else {
+        toast.error(response.message)
+      }
+    } catch (error) {
+      toast.error("An error occurred during login")
+      console.error("Login error:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <main className="min-h-screen w-full relative bg-[#0D0D0D] overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0">
         <Iridescence
-          color={[0.2, 0, 0.3]} // Darker purple
-          speed={0.7}
+          color={[0.2, 0, 0.3]}
+          speed={1}
           amplitude={0.2}
           mouseReact={true}
         />
@@ -29,7 +56,7 @@ export default function LoginPage() {
 
       {/* Logo */}
       <div className="relative z-10 p-6">
-        <img src={logoImage || "/placeholder.svg"} alt="ArWoh" className="h-8" />
+        <img src={logoImage || "/placeholder.svg"} alt="ArWoh" className="h-8d" />
       </div>
 
       {/* Login Form */}
@@ -44,15 +71,33 @@ export default function LoginPage() {
           <h2 className="font-bold text-xl text-white">Login</h2>
           <p className="text-gray-300 text-sm max-w-sm mt-2">Welcome to our website.</p>
 
-          <form className="my-8">
+          <form className="my-8" onSubmit={handleSubmit}>
             <LabelInputContainer className="mb-4">
-              <Label className="text-white" htmlFor="email">Email</Label>
-              <Input id="email" placeholder="projectmayhem@fc.com" type="email" />
+              <Label className="text-white" htmlFor="email">
+                Email
+              </Label>
+              <Input
+                id="email"
+                placeholder="skibidi@fpt.edu.com"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </LabelInputContainer>
             <LabelInputContainer className="mb-4">
-              <Label className="text-white" htmlFor="password">Password</Label>
+              <Label className="text-white" htmlFor="password">
+                Password
+              </Label>
               <div className="relative">
-                <Input id="password" placeholder="••••••••" type={showPassword ? "text" : "password"} />
+                <Input
+                  id="password"
+                  placeholder="••••••••"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -63,21 +108,23 @@ export default function LoginPage() {
               </div>
             </LabelInputContainer>
             <Button
+              type="submit"
               className="w-full h-12 text-white text-base font-medium"
               style={{
                 background: "linear-gradient(90deg, #4F0094, #920072)",
                 border: "none",
                 borderRadius: "8px",
               }}
+              disabled={isLoading}
             >
-              Login
+              {isLoading ? "Logging in..." : "Login"}
             </Button>
           </form>
           <div className="text-sm text-center text-gray-300">
             Don't have an account?{" "}
-            <a href="/register" className="text-purple-600 font-bold hover:text-purple-500">
+            <Link to="/register" className="text-purple-600 font-bold hover:text-purple-500">
               Register
-            </a>
+            </Link>
           </div>
         </div>
       </div>
