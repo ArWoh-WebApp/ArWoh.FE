@@ -110,7 +110,7 @@ export default function RegisterPage() {
 
       {/* Logo */}
       <div className="relative z-10 p-6">
-        <img src={logoImage || "/placeholder.svg"} alt="ArWoh" className="h-8" />
+        <img src={logoImage || "/placeholder.svg"} alt="ArWoh" className="h-8d" />
       </div>
 
       {/* Register Form */}

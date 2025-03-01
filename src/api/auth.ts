@@ -4,16 +4,37 @@ import axiosInstance from "./axiosInstance"
 const LOGIN_API = "/auth/login"
 const REGISTER_CUSTOMER_API = "/auth/register/customer"
 const REGISTER_PHOTOGRAPHER_API = "/auth/register/photographer"
+const PROFILE_API = "/users/profile"
+//const UPDATE_PROFILE_API = "/users/profile"
+//const UPDATE_AVATAR_API = "/users/avatar"
 
 export namespace Auth {
-    //REGISTER
+    // Common Types
+    export interface ApiResponse<T> {
+        isSuccess: boolean
+        message: string
+        data: T
+    }
+
+    // User Types
+    export interface User {
+        id: number
+        username: string
+        email: string
+        role: "Customer" | "Photographer"
+        bio: string | null
+        profilePictureUrl: string | null
+        createdAt: string
+        updatedAt: string | null
+    }
+
+    // Request/Response Types
     export interface RegisterPayload {
         username: string
         email: string
         password: string
     }
 
-    // User data - register response
     export interface RegisterResponseData {
         username: string
         email: string
@@ -36,19 +57,32 @@ export namespace Auth {
         data: RegisterResponseData
     }
 
-    //LOGIN
-    export interface LoginResponse {
-        isSuccess: boolean
-        message: string
-        data: string // JWT accessToken string - BE response quá điên
-    }
-
     export interface LoginPayload {
         email: string
         password: string
     }
 
+    export interface LoginResponse {
+        isSuccess: boolean
+        message: string
+        data: string // JWT accessToken string (vì BE ko thèm chia access, refresh)
+    }
 
+    // export interface UpdateProfilePayload {
+    //     username?: string
+    //     bio?: string
+    //     phoneNumber?: string
+    //     address?: string
+    //     dateOfBirth?: string
+    //     gender?: "male" | "female" | "other"
+    //     preferences?: {
+    //         emailNotifications?: boolean
+    //         marketingEmails?: boolean
+    //         [key: string]: any
+    //     }
+    // }
+
+    // Auth Functions
     export async function login(payload: LoginPayload): Promise<LoginResponse> {
         try {
             const response = await axiosInstance.post<LoginResponse>(LOGIN_API, payload)
@@ -60,7 +94,6 @@ export namespace Auth {
 
             return response.data
         } catch (error: any) {
-            // Handle specific error cases
             if (error.code === "ERR_NETWORK") {
                 return {
                     isSuccess: false,
@@ -77,7 +110,6 @@ export namespace Auth {
                 }
             }
 
-            // Generic error handling
             return {
                 isSuccess: false,
                 message: error.message || "An unexpected error occurred",
@@ -128,6 +160,58 @@ export namespace Auth {
         }
     }
 
+    export async function getUserProfile(): Promise<ApiResponse<User>> {
+        try {
+            const response = await axiosInstance.get<ApiResponse<User>>(PROFILE_API)
+            return response.data
+        } catch (error: any) {
+            return {
+                isSuccess: false,
+                message: error.message || "Failed to fetch user profile",
+                data: null as any,
+            }
+        }
+    }
+
+    // export async function updateProfile(payload: UpdateProfilePayload): Promise<ApiResponse<UserProfile>> {
+    //     try {
+    //         const response = await axiosInstance.put<ApiResponse<UserProfile>>(UPDATE_PROFILE_API, payload)
+    //         return response.data
+    //     } catch (error: any) {
+    //         return {
+    //             isSuccess: false,
+    //             message: error.message || "Failed to update profile",
+    //             data: null as any,
+    //         }
+    //     }
+    // }
+
+
+    // export async function updateAvatar(file: File): Promise<ApiResponse<{ profilePictureUrl: string }>> {
+    //     try {
+    //         const formData = new FormData()
+    //         formData.append("avatar", file)
+
+    //         const response = await axiosInstance.post<ApiResponse<{ profilePictureUrl: string }>>(
+    //             UPDATE_AVATAR_API,
+    //             formData,
+    //             {
+    //                 headers: {
+    //                     "Content-Type": "multipart/form-data",
+    //                 },
+    //             },
+    //         )
+    //         return response.data
+    //     } catch (error: any) {
+    //         return {
+    //             isSuccess: false,
+    //             message: error.message || "Failed to update avatar",
+    //             data: null as any,
+    //         }
+    //     }
+    // }
+
+    // Auth Utility Functions
     export function logout(): void {
         localStorage.removeItem("accessToken")
     }
@@ -140,3 +224,4 @@ export namespace Auth {
         return !!getToken()
     }
 }
+

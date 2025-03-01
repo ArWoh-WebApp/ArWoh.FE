@@ -36,22 +36,8 @@ const AppContent: React.FC = () => {
 						<Routes location={location}>
 							{/* Public Routes */}
 							<Route path="/" element={<Home />} />
-							<Route
-								path="/login"
-								element={
-									<ProtectedRoute requireAuth={false}>
-										<Login />
-									</ProtectedRoute>
-								}
-							/>
-							<Route
-								path="/register"
-								element={
-									<ProtectedRoute requireAuth={false}>
-										<Register />
-									</ProtectedRoute>
-								}
-							/>
+							<Route path="/login" element={<Login />} />
+							<Route path="/register" element={<Register />} />
 							<Route path="/art-gallery" element={<ArtworkList />} />
 
 							{/* Protected Routes */}

@@ -36,6 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // and fetch the user data
             // const userData = await Auth.getCurrentUser()
             // setUser(userData)
+
             setIsAuthenticated(true)
         } catch (error) {
             console.error("Auth check failed:", error)
@@ -62,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 // setUser(userData)
 
                 toast.success("Login successful")
-                navigate("/user-profile")
+                navigate("/")
             } else {
                 toast.error(response.message)
             }

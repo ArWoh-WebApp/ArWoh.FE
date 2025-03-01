@@ -21,7 +21,7 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
             if (requireAuth && !isAuthenticated) {
                 navigate("/login")
             } else if (!requireAuth && isAuthenticated) {
-                navigate("/user-profile")
+                navigate("/")
             }
         }
     }, [isAuthenticated, isLoading, navigate, requireAuth])

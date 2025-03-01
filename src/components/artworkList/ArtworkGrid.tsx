@@ -34,7 +34,7 @@ export default function ArtworkList() {
 
 	const handlePrevious = () => {
 		const currentIndex = artworks.findIndex((a) => a.id === selectedArtwork?.id)
-		if (currentIndex > 0) {
+		if (currentIndex > 0) {	
 			const prevArtwork = artworks[currentIndex - 1]
 			setSelectedArtwork(null)
 			setTimeout(() => {

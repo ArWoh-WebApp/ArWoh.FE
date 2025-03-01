@@ -23,5 +23,29 @@ axiosInstance.interceptors.request.use(
     },
 )
 
+// Add response interceptor
+axiosInstance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response) {
+        switch (error.response.status) {
+          case 401:
+            // Handle unauthorized
+            break
+          case 403:
+            // Handle forbidden
+            break
+          case 404:
+            // Handle not found
+            break
+          default:
+            // Handle other errors
+            break
+        }
+      }
+      return Promise.reject(error)
+    },
+  )
+
 export default axiosInstance
 
