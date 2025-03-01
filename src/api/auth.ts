@@ -127,4 +127,16 @@ export namespace Auth {
             }
         }
     }
+
+    export function logout(): void {
+        localStorage.removeItem("accessToken")
+    }
+
+    export function getToken(): string | null {
+        return localStorage.getItem("accessToken")
+    }
+
+    export function isAuthenticated(): boolean {
+        return !!getToken()
+    }
 }

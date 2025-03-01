@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom"
 import Header from "./components/Header"
@@ -13,16 +15,11 @@ import { Toaster } from "./components/ui/sonner"
 import UserProfile from "./pages/UserProfile"
 import { CartProvider } from "./contexts/CardContext"
 import { CartDrawer } from "./components/cart/CartDrawer"
+import { AuthProvider } from "./contexts/AuthContext"
+import { ProtectedRoute } from "./components/security/ProtectedRoute"
 
 // Define valid routes
-const validRoutes = [
-	"/",
-	"/login",
-	"/register",
-	"/art-gallery",
-	"/user-profile",
-	"/not-found",
-]
+const validRoutes = ["/", "/login", "/register", "/art-gallery", "/user-profile", "/not-found"]
 
 const AppContent: React.FC = () => {
 	const location = useLocation()
@@ -37,15 +34,37 @@ const AppContent: React.FC = () => {
 				<AnimatePresence mode="wait">
 					<PageTransition key={location.pathname}>
 						<Routes location={location}>
+							{/* Public Routes */}
 							<Route path="/" element={<Home />} />
-							<Route path="/login" element={<Login />} />
-							<Route path="/register" element={<Register />} />
+							<Route
+								path="/login"
+								element={
+									<ProtectedRoute requireAuth={false}>
+										<Login />
+									</ProtectedRoute>
+								}
+							/>
+							<Route
+								path="/register"
+								element={
+									<ProtectedRoute requireAuth={false}>
+										<Register />
+									</ProtectedRoute>
+								}
+							/>
 							<Route path="/art-gallery" element={<ArtworkList />} />
-							<Route path="/user-profile" element={<UserProfile />} />
 
-							{/* Protected routes */}
+							{/* Protected Routes */}
+							<Route
+								path="/user-profile"
+								element={
+									<ProtectedRoute>
+										<UserProfile />
+									</ProtectedRoute>
+								}
+							/>
 
-							{/* 404 Page*/}
+							{/* 404 Page */}
 							<Route path="*" element={<NotFound />} />
 						</Routes>
 					</PageTransition>
@@ -58,16 +77,17 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
 	return (
-		<>
-			<CartProvider>
-				<Router>
+		<Router>
+			<AuthProvider>
+				<CartProvider>
 					<AppContent />
 					<CartDrawer />
 					<Toaster />
-				</Router>
-			</CartProvider>
-		</>
+				</CartProvider>
+			</AuthProvider>
+		</Router>
 	)
 }
 
 export default App
+
