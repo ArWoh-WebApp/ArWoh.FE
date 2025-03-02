@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react"
-import { useCart } from "@/contexts/CardContext"
+import { useCart } from "@/contexts/CartContext"
 import { Button } from "@/components/ui/button"
 import { useLocation } from "react-router-dom"
 

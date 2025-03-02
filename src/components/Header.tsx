@@ -1,20 +1,23 @@
-import { useNavigate } from "react-router-dom"
-import { ChevronDown, Heart, ShoppingCart } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useNavigate } from "react-router-dom";
+import { ChevronDown, Heart, ShoppingCart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
-import logoImage from "@/assets/images/logo.png"
+import logoImage from "@/assets/images/logo.png";
 
 export default function Header() {
-	const navigate = useNavigate()
+	const navigate = useNavigate();
+	const { isAuthenticated, user, logout } = useAuth();
 
 	return (
 		<header className="w-full bg-black px-6 py-4">
 			<div className="max-w-[1400px] mx-auto flex items-center justify-between">
 				{/* Logo */}
 				<div className="flex-shrink-0">
-					<Button variant="link">
-						<img src={logoImage || "/placeholder.svg"} alt="ArWoh" className="h-6" onClick={() => navigate("/")} />
+					<Button variant="link" onClick={() => navigate("/")}>
+						<img src={logoImage || "/placeholder.svg"} alt="ArWoh" className="h-6" />
 					</Button>
 				</div>
 
@@ -65,27 +68,44 @@ export default function Header() {
 					<button className="text-white hover:text-gray-200">
 						<Heart className="h-6 w-6" />
 					</button>
-					<div className="hidden sm:flex items-center space-x-2">
-						<Button
-							variant="outline"
-							className="bg-white text-black hover:bg-white/90 border-0 px-6 transition-colors"
-							size="sm"
-							onClick={() => navigate("/login")}
-						>
-							Login
-						</Button>
-						<Button
-							variant="outline"
-							className="bg-black text-white border-white/20 px-6 transition-all hover:bg-white hover:border-white hover:text-black"
-							size="sm"
-							onClick={() => navigate("/register")}
-						>
-							Register
-						</Button>
-					</div>
+
+					{isAuthenticated ? (
+						// Show Avatar + Dropdown Menu if logged in
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Avatar className="cursor-pointer">
+									<AvatarImage src={user?.profilePictureUrl || "/default-avatar.png"} />
+									<AvatarFallback>{user?.username?.charAt(0).toUpperCase()}</AvatarFallback>
+								</Avatar>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
+								<DropdownMenuItem onClick={() => navigate("/user-profile")}>Profile</DropdownMenuItem>
+								<DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					) : (
+						// Show Login/Register if not authenticated
+						<div className="hidden sm:flex items-center space-x-2">
+							<Button
+								variant="outline"
+								className="bg-white text-black px-6 transition-colors"
+								size="sm"
+								onClick={() => navigate("/login")}
+							>
+								Login
+							</Button>
+							<Button
+								variant="outline"
+								className="bg-black text-white border-white/20 px-6 transition-all"
+								size="sm"
+								onClick={() => navigate("/register")}
+							>
+								Register
+							</Button>
+						</div>
+					)}
 				</div>
 			</div>
 		</header>
-	)
+	);
 }
-

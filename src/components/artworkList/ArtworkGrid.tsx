@@ -5,7 +5,7 @@ import { Heart, Plus, ChevronLeft, ChevronRight, Share2, X, ShoppingCart, Minus 
 import { cn } from "@/lib/utils"
 import { artworks } from "@/mock/artwork"
 import type { Artwork } from "@/mock/artworkInterface"
-import { useCart } from "@/contexts/CardContext"
+import { useCart } from "@/contexts/CartContext"
 import { toast } from "sonner"
 
 type Orientation = "all" | "landscape" | "portrait"

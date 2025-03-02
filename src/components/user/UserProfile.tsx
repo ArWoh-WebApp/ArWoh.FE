@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import type React from "react"
@@ -10,10 +11,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Auth } from "@/api/auth"
+import { UserService } from "@/api/user"
 
 export function UserProfile() {
-    const [user, setUser] = useState<Auth.User | null>(null)
+    const [user, setUser] = useState<UserService.User | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isUploading, setIsUploading] = useState(false)
     const [isDragging, setIsDragging] = useState(false)
@@ -23,7 +24,7 @@ export function UserProfile() {
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
-                const response = await Auth.getUserProfile()
+                const response = await UserService.getUserProfile()
                 if (response.isSuccess) {
                     setUser(response.data)
                 } else {
@@ -77,7 +78,7 @@ export function UserProfile() {
 
         setIsUploading(true)
         try {
-            const response = await Auth.updateAvatar(file)
+            const response = await UserService.updateAvatar(file)
             if (response.isSuccess) {
                 setUser((prev) =>
                     prev
