@@ -1,15 +1,27 @@
-import { useNavigate } from "react-router-dom";
-import { ChevronDown, Heart, ShoppingCart } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/contexts/AuthContext";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useNavigate } from "react-router-dom"
+import { ChevronDown, LogOut, UserCircle, Loader2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { useAuth } from "@/contexts/AuthContext"
 
-import logoImage from "@/assets/images/logo.png";
+import logoImage from "@/assets/images/logo.png"
 
 export default function Header() {
-	const navigate = useNavigate();
-	const { isAuthenticated, user, logout } = useAuth();
+	const navigate = useNavigate()
+	const { isAuthenticated, user, logout, isLoading } = useAuth()
+
+	const handleLogout = async () => {
+		logout()
+		navigate("/login")
+	}
 
 	return (
 		<header className="w-full bg-black px-6 py-4">
@@ -62,29 +74,42 @@ export default function Header() {
 
 				{/* Actions */}
 				<div className="flex items-center space-x-4">
-					<button className="text-white hover:text-gray-200">
-						<ShoppingCart className="h-6 w-6" />
-					</button>
-					<button className="text-white hover:text-gray-200">
-						<Heart className="h-6 w-6" />
-					</button>
-
-					{isAuthenticated ? (
-						// Show Avatar + Dropdown Menu if logged in
+					{isLoading ? (
+						<div className="w-10 h-10 flex items-center justify-center">
+							<Loader2 className="h-5 w-5 animate-spin text-white" />
+						</div>
+					) : isAuthenticated && user ? (
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
-								<Avatar className="cursor-pointer">
-									<AvatarImage src={user?.profilePictureUrl || "/default-avatar.png"} />
-									<AvatarFallback>{user?.username?.charAt(0).toUpperCase()}</AvatarFallback>
-								</Avatar>
+								<Button variant="ghost" className="relative h-10 w-10 rounded-full" aria-label="User menu">
+									<Avatar className="h-10 w-10">
+										<AvatarImage src={user.profilePictureUrl || "/default-avatar.png"} alt={user.username} />
+										<AvatarFallback className="bg-purple-600">{user.username?.charAt(0).toUpperCase()}</AvatarFallback>
+									</Avatar>
+								</Button>
 							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end">
-								<DropdownMenuItem onClick={() => navigate("/user-profile")}>Profile</DropdownMenuItem>
-								<DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+							<DropdownMenuContent className="w-56 bg-black border border-white/10" align="end">
+								<DropdownMenuLabel className="text-white">
+									<div className="flex flex-col space-y-1">
+										<p className="text-sm font-medium">{user.username}</p>
+										<p className="text-xs text-gray-400">{user.email}</p>
+									</div>
+								</DropdownMenuLabel>
+								<DropdownMenuSeparator className="bg-white/10" />
+								<DropdownMenuItem
+									className="text-white focus:bg-white/10 focus:text-white"
+									onClick={() => navigate("/user-profile")}
+								>
+									<UserCircle className="mr-2 h-4 w-4" />
+									Profile
+								</DropdownMenuItem>
+								<DropdownMenuItem className="text-red-500 focus:bg-white/10 focus:text-red-500" onClick={handleLogout}>
+									<LogOut className="mr-2 h-4 w-4" />
+									Log out
+								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
 					) : (
-						// Show Login/Register if not authenticated
 						<div className="hidden sm:flex items-center space-x-2">
 							<Button
 								variant="outline"
@@ -107,5 +132,6 @@ export default function Header() {
 				</div>
 			</div>
 		</header>
-	);
+	)
 }
+

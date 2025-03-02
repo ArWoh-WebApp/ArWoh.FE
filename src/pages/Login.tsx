@@ -8,8 +8,7 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import Iridescence from "@/components/ui/iridescence"
-import { Auth } from "@/api/auth"
-import { toast } from "sonner"
+import { useAuth } from "@/contexts/AuthContext" // Import useAuth
 import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
 
@@ -21,21 +20,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+  const { login } = useAuth() // Use AuthContext's login
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      const response = await Auth.login({ email, password })
-      if (response.isSuccess) {
-        toast.success("Login successful")
+      const success = await login(email, password) // Use AuthContext's login
+      if (success) {
         navigate("/")
-      } else {
-        toast.error(response.message)
       }
     } catch (error) {
-      toast.error("An error occurred during login")
       console.error("Login error:", error)
     } finally {
       setIsLoading(false)
@@ -46,12 +42,7 @@ export default function LoginPage() {
     <main className="min-h-screen w-full relative bg-[#0D0D0D] overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0">
-        <Iridescence
-          color={[0.2, 0, 0.3]}
-          speed={1}
-          amplitude={0.2}
-          mouseReact={true}
-        />
+        <Iridescence color={[0.2, 0, 0.3]} speed={1} amplitude={0.2} mouseReact={true} />
       </div>
 
       {/* Logo */}

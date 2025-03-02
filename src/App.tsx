@@ -31,29 +31,64 @@ const AppContent: React.FC = () => {
 		<div className="min-h-screen flex flex-col">
 			{showHeaderFooter && <Header />}
 			<main className="flex-1">
-				<AnimatePresence mode="wait">
-					<PageTransition key={location.pathname}>
-						<Routes location={location}>
-							{/* Public Routes */}
-							<Route path="/" element={<Home />} />
-							<Route path="/login" element={<Login />} />
-							<Route path="/register" element={<Register />} />
-							<Route path="/art-gallery" element={<ArtworkList />} />
+				<AnimatePresence mode="wait" initial={false}>
+					<Routes>
+						{/* Public Routes */}
+						<Route
+							path="/"
+							element={
+								<PageTransition>
+									<Home />
+								</PageTransition>
+							}
+						/>
+						<Route
+							path="/login"
+							element={
+								<PageTransition>
+									<Login />
+								</PageTransition>
+							}
+						/>
+						<Route
+							path="/register"
+							element={
+								<PageTransition>
+									<Register />
+								</PageTransition>
+							}
+						/>
+						<Route
+							path="/art-gallery"
+							element={
+								<PageTransition>
+									<ArtworkList />
+								</PageTransition>
+							}
+						/>
 
-							{/* Protected Routes */}
-							<Route
-								path="/user-profile"
-								element={
-									<ProtectedRoute>
+						{/* Protected Routes */}
+						<Route
+							path="/user-profile"
+							element={
+								<ProtectedRoute>
+									<PageTransition>
 										<UserPage />
-									</ProtectedRoute>
-								}
-							/>
+									</PageTransition>
+								</ProtectedRoute>
+							}
+						/>
 
-							{/* 404 Page */}
-							<Route path="*" element={<NotFound />} />
-						</Routes>
-					</PageTransition>
+						{/* 404 Page */}
+						<Route
+							path="*"
+							element={
+								<PageTransition>
+									<NotFound />
+								</PageTransition>
+							}
+						/>
+					</Routes>
 				</AnimatePresence>
 			</main>
 			{showHeaderFooter && <Footer />}
