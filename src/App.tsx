@@ -12,11 +12,11 @@ import { AnimatePresence } from "framer-motion"
 import PageTransition from "./components/animations/PageTransition"
 import ArtworkList from "./pages/ArtworkList"
 import { Toaster } from "./components/ui/sonner"
-import UserProfile from "./pages/UserProfile"
 import { CartProvider } from "./contexts/CardContext"
 import { CartDrawer } from "./components/cart/CartDrawer"
 import { AuthProvider } from "./contexts/AuthContext"
 import { ProtectedRoute } from "./components/security/ProtectedRoute"
+import UserPage from "./pages/UserPage"
 
 // Define valid routes
 const validRoutes = ["/", "/login", "/register", "/art-gallery", "/user-profile", "/not-found"]
@@ -45,7 +45,7 @@ const AppContent: React.FC = () => {
 								path="/user-profile"
 								element={
 									<ProtectedRoute>
-										<UserProfile />
+										<UserPage />
 									</ProtectedRoute>
 								}
 							/>

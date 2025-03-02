@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 // setUser(userData)
 
                 toast.success("Login successful")
-                navigate("/")
+                navigate("/user-profile")
             } else {
                 toast.error(response.message)
             }

@@ -5,6 +5,7 @@ const LOGIN_API = "/auth/login"
 const REGISTER_CUSTOMER_API = "/auth/register/customer"
 const REGISTER_PHOTOGRAPHER_API = "/auth/register/photographer"
 const PROFILE_API = "/users/profile"
+const UPDATE_AVATAR_API = "/users/me/avatar"
 //const UPDATE_PROFILE_API = "/users/profile"
 //const UPDATE_AVATAR_API = "/users/avatar"
 
@@ -68,6 +69,18 @@ export namespace Auth {
         data: string // JWT accessToken string (vì BE ko thèm chia access, refresh)
     }
 
+    export interface UpdateAvatarResponse {
+        isSuccess: boolean
+        message: string
+        data: {
+            userId: number
+            username: string
+            email: string | null
+            bio: string | null
+            profilePictureUrl: string
+        }
+    }
+
     // export interface UpdateProfilePayload {
     //     username?: string
     //     bio?: string
@@ -81,6 +94,7 @@ export namespace Auth {
     //         [key: string]: any
     //     }
     // }
+
 
     // Auth Functions
     export async function login(payload: LoginPayload): Promise<LoginResponse> {
@@ -168,6 +182,27 @@ export namespace Auth {
             return {
                 isSuccess: false,
                 message: error.message || "Failed to fetch user profile",
+                data: null as any,
+            }
+        }
+    }
+
+    export async function updateAvatar(file: File): Promise<UpdateAvatarResponse> {
+        try {
+            const formData = new FormData()
+            formData.append("file", file)
+
+            const response = await axiosInstance.put<UpdateAvatarResponse>(UPDATE_AVATAR_API, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            })
+
+            return response.data
+        } catch (error: any) {
+            return {
+                isSuccess: false,
+                message: error.message || "Failed to update avatar",
                 data: null as any,
             }
         }
