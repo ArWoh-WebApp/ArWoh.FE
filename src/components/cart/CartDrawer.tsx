@@ -115,7 +115,7 @@ export function CartDrawer() {
                                                     {/* Item Details */}
                                                     <div className="flex flex-1 flex-col">
                                                         <h3 className="font-medium text-white">{item.title}</h3>
-                                                        <p className="text-sm text-white/60">by {item.user.name}</p>
+                                                        <p className="text-sm text-white/60">by {item.user.username}</p>
                                                         <div className="mt-2 flex items-center justify-between">
                                                             <div className="flex items-center gap-2">
                                                                 <button

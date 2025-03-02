@@ -1,136 +1,140 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
-import type React from "react"
-import { createContext, useContext, useReducer, useEffect, useState } from "react"
+import type { ReactNode } from "react"
+import { createContext, useContext, useEffect, useState } from "react"
 import { useAuth } from "./AuthContext"
 import { toast } from "sonner"
-import type { Artwork } from "@/mock/artworkInterface"
+import type { Cart, CartItem, CreateCartItemDto } from "@/api/cart"
+import { cartService } from "@/api/cart"
 
-interface CartItem extends Artwork {
-  quantity: number
-}
-
-interface CartState {
+interface CartContextType {
   items: CartItem[]
   isOpen: boolean
-}
-
-type CartAction =
-  | { type: "ADD_ITEM"; payload: { artwork: Artwork; quantity: number } }
-  | { type: "REMOVE_ITEM"; payload: string }
-  | { type: "UPDATE_QUANTITY"; payload: { id: string; quantity: number } }
-  | { type: "CLEAR_CART" }
-  | { type: "TOGGLE_CART" }
-
-interface CartContextType extends CartState {
-  addItem: (artwork: Artwork, quantity?: number) => void
-  removeItem: (artworkId: string) => void
-  updateQuantity: (artworkId: string, quantity: number) => void
-  clearCart: () => void
+  isLoading: boolean
+  addItem: (artworkId: string, quantity: number) => Promise<void>
+  removeItem: (itemId: string) => Promise<void>
+  updateQuantity: (itemId: string, quantity: number) => Promise<void>
+  clearCart: () => Promise<void>
   toggleCart: () => void
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
-function cartReducer(state: CartState, action: CartAction): CartState {
-  switch (action.type) {
-    case "ADD_ITEM": {
-      const existingItem = state.items.find((item) => item.id === action.payload.artwork.id)
-      if (existingItem) {
-        return {
-          ...state,
-          items: state.items.map((item) =>
-            item.id === action.payload.artwork.id
-              ? { ...item, quantity: item.quantity + action.payload.quantity }
-              : item,
-          ),
-        }
-      }
-      return {
-        ...state,
-        items: [...state.items, { ...action.payload.artwork, quantity: action.payload.quantity }],
-      }
-    }
-    case "REMOVE_ITEM":
-      return {
-        ...state,
-        items: state.items.filter((item) => item.id !== action.payload),
-      }
-    case "UPDATE_QUANTITY":
-      return {
-        ...state,
-        items: state.items.map((item) =>
-          item.id === action.payload.id ? { ...item, quantity: action.payload.quantity } : item,
-        ),
-      }
-    case "CLEAR_CART":
-      return {
-        ...state,
-        items: [],
-      }
-    case "TOGGLE_CART":
-      return {
-        ...state,
-        isOpen: !state.isOpen,
-      }
-    default:
-      return state
-  }
-}
-
-export function CartProvider({ children }: { children: React.ReactNode }) {
+export function CartProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth()
-  const [mounted, setMounted] = useState(false)
-  const [state, dispatch] = useReducer(cartReducer, {
-    items: [],
-    isOpen: false,
-  })
+  const [cart, setCart] = useState<Cart | null>(null)
+  const [isOpen, setIsOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-  // Load cart from localStorage on mount
+  // Fetch cart when authenticated
   useEffect(() => {
-    const savedCart = localStorage.getItem("cart")
-    if (savedCart && isAuthenticated) {
-      const { items } = JSON.parse(savedCart)
-      items.forEach((item: CartItem) => {
-        dispatch({ type: "ADD_ITEM", payload: { artwork: item, quantity: item.quantity } })
-      })
+    if (isAuthenticated) {
+      fetchCart()
+    } else {
+      setCart(null)
     }
-    setMounted(true)
   }, [isAuthenticated])
 
-  // Save cart to localStorage when it changes
-  useEffect(() => {
-    if (mounted && isAuthenticated) {
-      localStorage.setItem("cart", JSON.stringify({ items: state.items }))
+  const fetchCart = async () => {
+    try {
+      setIsLoading(true)
+      const response = await cartService.getMyCart()
+      if (response.isSuccess) {
+        setCart(response.data)
+      }
+    } catch (error) {
+      toast.error("Failed to fetch cart")
+    } finally {
+      setIsLoading(false)
     }
-  }, [state.items, mounted, isAuthenticated])
+  }
 
-  const addItem = (artwork: Artwork, quantity = 1) => {
+  const addItem = async (artworkId: string, quantity: number) => {
     if (!isAuthenticated) {
       toast.error("Please login to add items to cart")
       return
     }
-    dispatch({ type: "ADD_ITEM", payload: { artwork, quantity } })
-    toast.success("Item added to cart")
-  }
 
-  const removeItem = (artworkId: string) => {
-    if (!isAuthenticated) return
-    dispatch({ type: "REMOVE_ITEM", payload: artworkId })
-  }
+    try {
+      setIsLoading(true)
+      const item: CreateCartItemDto = { artworkId, quantity }
 
-  const updateQuantity = (artworkId: string, quantity: number) => {
-    if (!isAuthenticated) return
-    if (quantity === 0) {
-      removeItem(artworkId)
-    } else {
-      dispatch({ type: "UPDATE_QUANTITY", payload: { id: artworkId, quantity } })
+      if (!cart) {
+        // Create new cart if it doesn't exist
+        const response = await cartService.createCart([item])
+        if (response.isSuccess) {
+          setCart(response.data)
+          toast.success("Item added to cart")
+        }
+      } else {
+        // Update existing cart
+        const response = await cartService.updateCartItem(artworkId, { quantity })
+        if (response.isSuccess) {
+          setCart(response.data)
+          toast.success("Cart updated")
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to add item to cart")
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  const clearCart = () => {
-    if (!isAuthenticated) return
-    dispatch({ type: "CLEAR_CART" })
+  const removeItem = async (itemId: string) => {
+    if (!isAuthenticated || !cart) return
+
+    try {
+      setIsLoading(true)
+      const response = await cartService.deleteCartItem(itemId)
+      if (response.isSuccess) {
+        setCart(response.data)
+        toast.success("Item removed from cart")
+      }
+    } catch (error) {
+      toast.error("Failed to remove item from cart")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const updateQuantity = async (itemId: string, quantity: number) => {
+    if (!isAuthenticated || !cart) return
+
+    try {
+      setIsLoading(true)
+      if (quantity === 0) {
+        await removeItem(itemId)
+      } else {
+        const response = await cartService.updateCartItem(itemId, { quantity })
+        if (response.isSuccess) {
+          setCart(response.data)
+          toast.success("Cart updated")
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to update cart")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const clearCart = async () => {
+    if (!isAuthenticated || !cart) return
+
+    try {
+      setIsLoading(true)
+      for (const item of cart.items) {
+        await cartService.deleteCartItem(item.id)
+      }
+      setCart(null)
+      toast.success("Cart cleared")
+    } catch (error) {
+      toast.error("Failed to clear cart")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const toggleCart = () => {
@@ -138,13 +142,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       toast.error("Please login to view your cart")
       return
     }
-    dispatch({ type: "TOGGLE_CART" })
+    setIsOpen(!isOpen)
   }
 
   return (
     <CartContext.Provider
       value={{
-        ...state,
+        items: cart?.items || [],
+        isOpen,
+        isLoading,
         addItem,
         removeItem,
         updateQuantity,
@@ -165,3 +171,4 @@ export function useCart() {
   }
   return context
 }
+
