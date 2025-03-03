@@ -1,21 +1,44 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react"
-import { useCart } from "@/contexts/CardContext"
+import { useCart } from "@/contexts/CartContext"
 import { Button } from "@/components/ui/button"
+import { useLocation } from "react-router-dom"
 
 export function CartDrawer() {
     const { items, isOpen, toggleCart, removeItem, updateQuantity } = useCart()
     const [mounted, setMounted] = useState(false)
+    const drawerRef = useRef<HTMLDivElement>(null)
 
     // Handle hydration
     useEffect(() => {
         setMounted(true)
     }, [])
 
-    if (!mounted) return null
+    // Handle clicking outside
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (drawerRef.current && !drawerRef.current.contains(event.target as Node)) {
+                toggleCart()
+            }
+        }
+
+        if (isOpen) {
+            document.addEventListener("mousedown", handleClickOutside)
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside)
+        }
+    }, [isOpen, toggleCart])
+
+    const location = useLocation()
+    const hideOnRoutes = ["/login", "/register"]
+    const shouldShow = !hideOnRoutes.includes(location.pathname)
+
+    if (!mounted || !shouldShow) return null
 
     const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
@@ -38,13 +61,14 @@ export function CartDrawer() {
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={toggleCart}
+                            exit={{ opacity: 0, display: "none" }}
+                            transition={{ duration: 0.2 }}
                             className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
                         />
 
                         {/* Cart Panel */}
                         <motion.div
+                            ref={drawerRef}
                             initial={{ x: "100%" }}
                             animate={{ x: 0 }}
                             exit={{ x: "100%" }}
@@ -91,7 +115,7 @@ export function CartDrawer() {
                                                     {/* Item Details */}
                                                     <div className="flex flex-1 flex-col">
                                                         <h3 className="font-medium text-white">{item.title}</h3>
-                                                        <p className="text-sm text-white/60">by {item.user.name}</p>
+                                                        <p className="text-sm text-white/60">by {item.user.username}</p>
                                                         <div className="mt-2 flex items-center justify-between">
                                                             <div className="flex items-center gap-2">
                                                                 <button
