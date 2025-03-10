@@ -2,11 +2,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Heart, Plus, ChevronLeft, ChevronRight, Share2, X, ShoppingCart, Minus, Loader2 } from "lucide-react"
+import { Plus, ChevronLeft, ChevronRight, Share2, X, ShoppingCart, Minus, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useCart } from "@/contexts/CartContext"
 import { artworkService, type ArtworkResponse } from "@/api/artwork"
 import { toast } from "sonner"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ArtworkCard } from "./ArtworkCard"
 
 type Orientation = "all" | "landscape" | "portrait"
 
@@ -18,6 +20,7 @@ export default function ArtworkList() {
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 	const { addItem, isLoading: isCartLoading } = useCart()
+	const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>({})
 
 	useEffect(() => {
 		const fetchArtworks = async () => {
@@ -37,6 +40,13 @@ export default function ArtworkList() {
 
 		fetchArtworks()
 	}, [])
+
+	const handleImageLoaded = (artworkId: number) => {
+		setLoadedImages((prev) => ({
+			...prev,
+			[artworkId]: true,
+		}))
+	}
 
 	const filteredArtworks = artworks.filter((artwork) => {
 		if (orientation === "all") return true
@@ -80,15 +90,31 @@ export default function ArtworkList() {
 
 	const handleAddToCart = () => {
 		if (selectedArtwork) {
-			addItem(selectedArtwork.id, quantity)			
+			addItem(selectedArtwork.id, quantity)
+			toast.success("Added to cart!")
 			handleCloseDetail()
 		}
 	}
 
 	if (isLoading) {
 		return (
-			<div className="flex justify-center items-center min-h-[400px]">
-				<Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+			<div className="space-y-6">
+				{/* Skeleton for Orientation Filter */}
+				<div className="flex gap-2">
+					{[1, 2, 3].map((i) => (
+						<Skeleton key={i} className="h-10 w-24" />
+					))}
+				</div>
+
+				{/* Skeleton for Artwork Grid */}
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[200px]">
+					{Array.from({ length: 9 }).map((_, index) => (
+						<Skeleton
+							key={index}
+							className={cn("w-full h-full rounded-lg", index % 3 === 0 ? "row-span-2" : "row-span-1")}
+						/>
+					))}
+				</div>
 			</div>
 		)
 	}
@@ -141,26 +167,31 @@ export default function ArtworkList() {
 					{selectedArtwork && (
 						<div className="flex flex-col md:flex-row h-full w-full p-4 gap-8">
 							<div className="md:w-2/3 relative h-full flex items-center justify-center">
-								<img
-									src={selectedArtwork.url || "/placeholder.svg"}
-									alt={selectedArtwork.title}
-									className={cn(
-										"transition-opacity duration-300 rounded-lg",
-										selectedArtwork.orientation.toLowerCase() === "portrait"
-											? "h-full w-auto"
-											: "w-full h-auto max-h-full",
-									)}
-									key={selectedArtwork.id}
-								/>
+								<div className="relative w-full h-full flex items-center justify-center">
+									<Skeleton className="absolute inset-0 rounded-lg" />
+									<img
+										src={selectedArtwork.url || "/placeholder.svg"}
+										alt={selectedArtwork.title}
+										className={cn(
+											"transition-opacity duration-500 rounded-lg relative z-10",
+											selectedArtwork.orientation.toLowerCase() === "portrait"
+												? "h-full w-auto"
+												: "w-full h-auto max-h-full",
+											loadedImages[selectedArtwork.id] ? "opacity-100" : "opacity-0",
+										)}
+										key={selectedArtwork.id}
+										onLoad={() => handleImageLoaded(selectedArtwork.id)}
+									/>
+								</div>
 								<button
 									onClick={handlePrevious}
-									className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 rounded-full transition-transform duration-300 hover:scale-110"
+									className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 rounded-full transition-transform duration-300 hover:scale-110 z-20"
 								>
 									<ChevronLeft className="text-white" />
 								</button>
 								<button
 									onClick={handleNext}
-									className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 rounded-full transition-transform duration-300 hover:scale-110"
+									className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 rounded-full transition-transform duration-300 hover:scale-110 z-20"
 								>
 									<ChevronRight className="text-white" />
 								</button>
@@ -220,62 +251,6 @@ export default function ArtworkList() {
 							</div>
 						</div>
 					)}
-				</div>
-			</div>
-		</div>
-	)
-}
-
-function ArtworkCard({ artwork, onClick }: { artwork: ArtworkResponse; onClick: () => void }) {
-	return (
-		<div
-			onClick={onClick}
-			className={cn(
-				"relative group rounded-lg overflow-hidden cursor-pointer",
-				artwork.orientation.toLowerCase() === "portrait" ? "row-span-2" : "row-span-1",
-			)}
-		>
-			{/* Image */}
-			<img src={artwork.url || "/placeholder.svg"} alt={artwork.title} className="w-full h-full object-cover" />
-
-			{/* Overlay */}
-			<div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300">
-				{/* Top Actions */}
-				<div className="absolute top-4 right-4 flex gap-2">
-					<button
-						className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
-						onClick={(e) => {
-							e.stopPropagation()
-							// Handle like
-						}}
-					>
-						<Heart className="w-4 h-4 text-white" />
-					</button>
-					<button
-						className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
-						onClick={(e) => {
-							e.stopPropagation()
-							// Handle add to collection
-						}}
-					>
-						<Plus className="w-4 h-4 text-white" />
-					</button>
-				</div>
-
-				{/* Price */}
-				<div className="absolute bottom-4 right-4 bg-black/60 px-2 py-1 rounded">
-					<span className="text-white text-sm font-medium">{artwork.price.toLocaleString("vi-VN")} ₫</span>
-				</div>
-			</div>
-
-			{/* Tags */}
-			<div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-100 group-hover:opacity-0 transition-all duration-300">
-				<div className="flex flex-wrap gap-2">
-					{artwork.tags.slice(0, 3).map((tag) => (
-						<span key={tag} className="px-2 py-1 rounded-lg bg-white/20 text-white text-xs">
-							{tag}
-						</span>
-					))}
 				</div>
 			</div>
 		</div>
