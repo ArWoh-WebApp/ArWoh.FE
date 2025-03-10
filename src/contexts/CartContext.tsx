@@ -5,16 +5,17 @@ import type { ReactNode } from "react"
 import { createContext, useContext, useEffect, useState } from "react"
 import { useAuth } from "./AuthContext"
 import { toast } from "sonner"
-import type { Cart, CartItem, CreateCartItemDto } from "@/api/cart"
+import type { Cart, CartItem, CreateCartItemDto, UpdateCartItemDto } from "@/api/cart"
 import { cartService } from "@/api/cart"
 
 interface CartContextType {
-  items: CartItem[]
+  cartItems: CartItem[]
+  totalPrice: number
   isOpen: boolean
   isLoading: boolean
-  addItem: (artworkId: string, quantity: number) => Promise<void>
-  removeItem: (itemId: string) => Promise<void>
-  updateQuantity: (itemId: string, quantity: number) => Promise<void>
+  addItem: (imageId: number, quantity: number) => Promise<void>
+  removeItem: (cartItemId: number) => Promise<void>
+  updateQuantity: (cartItemId: number, quantity: number) => Promise<void>
   clearCart: () => Promise<void>
   toggleCart: () => void
 }
@@ -50,7 +51,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const addItem = async (artworkId: string, quantity: number) => {
+  const addItem = async (imageId: number, quantity: number) => {
     if (!isAuthenticated) {
       toast.error("Please login to add items to cart")
       return
@@ -58,22 +59,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     try {
       setIsLoading(true)
-      const item: CreateCartItemDto = { artworkId, quantity }
+      const dto: CreateCartItemDto = { imageId, quantity }
+      const response = await cartService.addToCart(dto)
 
-      if (!cart) {
-        // Create new cart if it doesn't exist
-        const response = await cartService.createCart([item])
-        if (response.isSuccess) {
-          setCart(response.data)
-          toast.success("Item added to cart")
-        }
-      } else {
-        // Update existing cart
-        const response = await cartService.updateCartItem(artworkId, { quantity })
-        if (response.isSuccess) {
-          setCart(response.data)
-          toast.success("Cart updated")
-        }
+      if (response.isSuccess) {
+        setCart(response.data)
+        toast.success("Item added to cart")
       }
     } catch (error) {
       toast.error("Failed to add item to cart")
@@ -82,12 +73,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const removeItem = async (itemId: string) => {
+  const removeItem = async (cartItemId: number) => {
     if (!isAuthenticated || !cart) return
 
     try {
       setIsLoading(true)
-      const response = await cartService.deleteCartItem(itemId)
+      const response = await cartService.removeCartItem(cartItemId)
       if (response.isSuccess) {
         setCart(response.data)
         toast.success("Item removed from cart")
@@ -99,15 +90,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const updateQuantity = async (itemId: string, quantity: number) => {
+  const updateQuantity = async (cartItemId: number, quantity: number) => {
     if (!isAuthenticated || !cart) return
 
     try {
       setIsLoading(true)
       if (quantity === 0) {
-        await removeItem(itemId)
+        await removeItem(cartItemId)
       } else {
-        const response = await cartService.updateCartItem(itemId, { quantity })
+        const dto: UpdateCartItemDto = { cartItemId, quantity }
+        const response = await cartService.updateCartItem(dto)
         if (response.isSuccess) {
           setCart(response.data)
           toast.success("Cart updated")
@@ -125,8 +117,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     try {
       setIsLoading(true)
-      for (const item of cart.items) {
-        await cartService.deleteCartItem(item.id)
+      for (const item of cart.cartItems) {
+        await cartService.removeCartItem(item.cartItemId)
       }
       setCart(null)
       toast.success("Cart cleared")
@@ -148,7 +140,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   return (
     <CartContext.Provider
       value={{
-        items: cart?.items || [],
+        cartItems: cart?.cartItems || [],
+        totalPrice: cart?.totalPrice || 0,
         isOpen,
         isLoading,
         addItem,

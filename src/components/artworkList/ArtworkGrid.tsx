@@ -6,6 +6,7 @@ import { Heart, Plus, ChevronLeft, ChevronRight, Share2, X, ShoppingCart, Minus,
 import { cn } from "@/lib/utils"
 import { useCart } from "@/contexts/CartContext"
 import { artworkService, type ArtworkResponse } from "@/api/artwork"
+import { toast } from "sonner"
 
 type Orientation = "all" | "landscape" | "portrait"
 
@@ -77,9 +78,9 @@ export default function ArtworkList() {
 		}
 	}
 
-	const handleAddToCart = async () => {
+	const handleAddToCart = () => {
 		if (selectedArtwork) {
-			await addItem(selectedArtwork.id.toString(), quantity)
+			addItem(selectedArtwork.id, quantity)			
 			handleCloseDetail()
 		}
 	}

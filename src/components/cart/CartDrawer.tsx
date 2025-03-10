@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useLocation } from "react-router-dom"
 
 export function CartDrawer() {
-    const { items, isOpen, toggleCart, removeItem, updateQuantity } = useCart()
+    const { cartItems, totalPrice, isOpen, toggleCart, removeItem, updateQuantity } = useCart()
     const [mounted, setMounted] = useState(false)
     const drawerRef = useRef<HTMLDivElement>(null)
 
@@ -40,8 +40,6 @@ export function CartDrawer() {
 
     if (!mounted || !shouldShow) return null
 
-    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-
     return (
         <>
             {/* Cart Toggle Button */}
@@ -50,7 +48,7 @@ export function CartDrawer() {
                 className="fixed right-4 top-28 z-50 flex items-center gap-2 rounded-full bg-white px-4 py-2 text-black shadow-lg transition-transform hover:scale-105"
             >
                 <ShoppingCart className="h-5 w-5" />
-                <span className="font-medium">{items.length}</span>
+                <span className="font-medium">{cartItems.length}</span>
             </button>
 
             {/* Cart Drawer */}
@@ -89,16 +87,16 @@ export function CartDrawer() {
 
                                 {/* Cart Items */}
                                 <div className="flex-1 overflow-y-auto p-4">
-                                    {items.length === 0 ? (
+                                    {cartItems.length === 0 ? (
                                         <div className="flex h-full flex-col items-center justify-center text-white/60">
                                             <ShoppingCart className="mb-4 h-12 w-12" />
                                             <p>Your cart is empty</p>
                                         </div>
                                     ) : (
                                         <div className="space-y-4">
-                                            {items.map((item) => (
+                                            {cartItems.map((item) => (
                                                 <motion.div
-                                                    key={item.id}
+                                                    key={item.cartItemId}
                                                     layout
                                                     initial={{ opacity: 0, y: 20 }}
                                                     animate={{ opacity: 1, y: 0 }}
@@ -106,34 +104,31 @@ export function CartDrawer() {
                                                     className="flex gap-4 rounded-lg border border-white/10 bg-white/5 p-4"
                                                 >
                                                     {/* Item Image */}
-                                                    <img
-                                                        src={item.src || "/placeholder.svg"}
-                                                        alt={item.title}
-                                                        className="h-20 w-20 rounded-lg object-cover"
-                                                    />
+                                                    <div className="h-20 w-20 rounded-lg bg-gray-800 flex items-center justify-center">
+                                                        <ShoppingCart className="h-8 w-8 text-gray-500" />
+                                                    </div>
 
                                                     {/* Item Details */}
                                                     <div className="flex flex-1 flex-col">
-                                                        <h3 className="font-medium text-white">{item.title}</h3>
-                                                        <p className="text-sm text-white/60">by {item.user.username}</p>
+                                                        <h3 className="font-medium text-white">{item.imageTitle}</h3>
                                                         <div className="mt-2 flex items-center justify-between">
                                                             <div className="flex items-center gap-2">
                                                                 <button
-                                                                    onClick={() => updateQuantity(item.id, Math.max(0, item.quantity - 1))}
+                                                                    onClick={() => updateQuantity(item.cartItemId, Math.max(0, item.quantity - 1))}
                                                                     className="rounded-full p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
                                                                 >
                                                                     <Minus className="h-4 w-4" />
                                                                 </button>
                                                                 <span className="min-w-[2rem] text-center text-white">{item.quantity}</span>
                                                                 <button
-                                                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                                    onClick={() => updateQuantity(item.cartItemId, item.quantity + 1)}
                                                                     className="rounded-full p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
                                                                 >
                                                                     <Plus className="h-4 w-4" />
                                                                 </button>
                                                             </div>
                                                             <button
-                                                                onClick={() => removeItem(item.id)}
+                                                                onClick={() => removeItem(item.cartItemId)}
                                                                 className="rounded-full p-2 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
                                                             >
                                                                 <Trash2 className="h-4 w-4" />
@@ -154,11 +149,11 @@ export function CartDrawer() {
                                 </div>
 
                                 {/* Footer */}
-                                {items.length > 0 && (
+                                {cartItems.length > 0 && (
                                     <div className="border-t border-white/10 p-4">
                                         <div className="mb-4 flex items-center justify-between">
                                             <span className="text-lg font-medium text-white">Total</span>
-                                            <span className="text-lg font-medium text-white">{total.toLocaleString("vi-VN")} ₫</span>
+                                            <span className="text-lg font-medium text-white">{totalPrice.toLocaleString("vi-VN")} ₫</span>
                                         </div>
                                         <Button
                                             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 py-6 text-white transition-transform hover:scale-[1.02]"
