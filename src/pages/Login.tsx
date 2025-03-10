@@ -1,48 +1,64 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import Iridescence from "@/components/ui/iridescence"
-import { useAuth } from "@/contexts/AuthContext" // Import useAuth
-import { useNavigate } from "react-router-dom"
-import { Link } from "react-router-dom"
+import type React from "react";
+import { useState, useCallback, memo, useRef } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import Iridescence from "@/components/ui/iridescence";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-import logoImage from "@/assets/images/logo.png"
+import logoImage from "@/assets/images/logo.png";
+
+// Memoized Iridescence to prevent unnecessary re-renders
+const MemoizedIridescence = memo(Iridescence);
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const navigate = useNavigate()
-  const { login } = useAuth() // Use AuthContext's login
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const emailRef = useRef<HTMLInputElement | null>(null);
+  const passwordRef = useRef<HTMLInputElement | null>(null);
+
+  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (emailRef.current) emailRef.current.value = e.target.value;
+    setEmail(e.target.value);
+  }, []);
+
+  const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (passwordRef.current) passwordRef.current.value = e.target.value;
+    setPassword(e.target.value);
+  }, []);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
-      const success = await login(email, password) // Use AuthContext's login
+      const success = await login(email, password);
       if (success) {
-        navigate("/")
+        setTimeout(() => navigate("/"), 100); // Delay navigation to avoid UI flicker
       }
     } catch (error) {
-      console.error("Login error:", error)
+      console.error("Login error:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <main className="min-h-screen w-full relative bg-[#0D0D0D] overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0">
-        <Iridescence color={[0.2, 0, 0.3]} speed={1} amplitude={0.2} mouseReact={true} />
+        <MemoizedIridescence color={[0.2, 0, 0.3]} speed={1} amplitude={0.1} mouseReact={false} />
       </div>
 
       {/* Logo */}
@@ -71,8 +87,9 @@ export default function LoginPage() {
                 id="email"
                 placeholder="skibidi@fpt.edu.com"
                 type="email"
+                ref={emailRef}
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 required
               />
             </LabelInputContainer>
@@ -85,8 +102,9 @@ export default function LoginPage() {
                   id="password"
                   placeholder="••••••••"
                   type={showPassword ? "text" : "password"}
+                  ref={passwordRef}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={handlePasswordChange}
                   required
                 />
                 <button
@@ -120,16 +138,15 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
-  )
+  );
 }
 
 const LabelInputContainer = ({
   children,
   className,
 }: {
-  children: React.ReactNode
-  className?: string
+  children: React.ReactNode;
+  className?: string;
 }) => {
-  return <div className={cn("flex flex-col space-y-2 w-full", className)}>{children}</div>
-}
-
+  return <div className={cn("flex flex-col space-y-2 w-full", className)}>{children}</div>;
+};
