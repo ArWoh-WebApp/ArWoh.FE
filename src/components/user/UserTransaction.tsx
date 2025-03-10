@@ -1,44 +1,78 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { format } from "date-fns"
-import { cn } from "@/lib/utils"
-
-// Mock data for transactions
-const transactions = [
-    {
-        id: 1,
-        artwork: {
-            title: "Abstract Harmony",
-            image: "https://images.unsplash.com/photo-1434725039720-aaad6dd32dfe?q=80&w=1942&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        },
-        price: 1500000,
-        status: "completed",
-        date: "2024-02-20T10:00:00Z",
-    },
-    {
-        id: 2,
-        artwork: {
-            title: "Urban Dreams",
-            image: "https://images.unsplash.com/photo-1511884642898-4c92249e20b6?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        },
-        price: 2300000,
-        status: "pending",
-        date: "2024-02-18T15:30:00Z",
-    },
-    {
-        id: 3,
-        artwork: {
-            title: "Nature's Whisper",
-            image: "https://images.unsplash.com/photo-1511576661531-b34d7da5d0bb?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        },
-        price: 1800000,
-        status: "completed",
-        date: "2024-02-15T09:15:00Z",
-    },
-]
+import { UserService } from "@/api/user"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function UserTransactions() {
+    const [transactions, setTransactions] = useState<UserService.Transaction[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+
+    useEffect(() => {
+        const fetchTransactions = async () => {
+            try {
+                const response = await UserService.getUserTransactions()
+                if (response.isSuccess) {
+                    setTransactions(response.data)
+                } else {
+                    setError(response.message)
+                }
+            } catch (err) {
+                setError("Failed to load transactions")
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchTransactions()
+    }, [])
+
+    if (isLoading) {
+        return (
+            <div className="space-y-6">
+                <div className="rounded-lg border border-white/10 bg-white/5">
+                    <div className="grid grid-cols-5 gap-4 p-4 text-sm font-medium text-white/60">
+                        <div>Artwork</div>
+                        <div>Title</div>
+                        <div className="text-right">Price</div>
+                        <div className="text-center">Status</div>
+                        <div className="text-right">Date</div>
+                    </div>
+                    <div className="divide-y divide-white/10">
+                        {[1, 2, 3].map((index) => (
+                            <div key={index} className="grid grid-cols-5 items-center gap-4 p-4">
+                                <Skeleton className="h-12 w-12 rounded-lg" />
+                                <Skeleton className="h-4 w-32" />
+                                <Skeleton className="h-4 w-24 justify-self-end" />
+                                <Skeleton className="h-6 w-20 justify-self-center rounded-full" />
+                                <Skeleton className="h-4 w-28 justify-self-end" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-white/10 bg-white/5 p-4 text-white">
+                <p>{error}</p>
+            </div>
+        )
+    }
+
+    if (transactions.length === 0) {
+        return (
+            <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-white/10 bg-white/5 p-4 text-white">
+                <p>No transactions found</p>
+            </div>
+        )
+    }
+
     return (
         <div className="space-y-6">
             <div className="rounded-lg border border-white/10 bg-white/5">
@@ -46,8 +80,8 @@ export function UserTransactions() {
                     <div>Artwork</div>
                     <div>Title</div>
                     <div className="text-right">Price</div>
-                    <div className="text-center">Status</div>
-                    <div className="text-right">Date</div>
+                    <div className="text-center">Location</div>
+                    <div className="text-right">Tags</div>
                 </div>
                 <div className="divide-y divide-white/10">
                     {transactions.map((transaction, index) => (
@@ -60,27 +94,32 @@ export function UserTransactions() {
                         >
                             <div>
                                 <img
-                                    src={transaction.artwork.image || "/placeholder.svg"}
-                                    alt={transaction.artwork.title}
+                                    src={transaction.url || "/placeholder.svg"}
+                                    alt={transaction.title}
                                     className="h-12 w-12 rounded-lg object-cover"
                                 />
                             </div>
-                            <div className="font-medium text-white">{transaction.artwork.title}</div>
+                            <div className="font-medium text-white">{transaction.title}</div>
                             <div className="text-right font-medium text-white">{transaction.price.toLocaleString("vi-VN")} ₫</div>
                             <div className="text-center">
-                                <span
-                                    className={cn(
-                                        "inline-block rounded-full px-2 py-1 text-xs font-medium",
-                                        transaction.status === "completed"
-                                            ? "bg-green-500/10 text-green-500"
-                                            : "bg-yellow-500/10 text-yellow-500",
-                                    )}
-                                >
-                                    {transaction.status}
+                                <span className="inline-block rounded-full bg-purple-500/10 px-2 py-1 text-xs font-medium text-purple-500">
+                                    {transaction.location}
                                 </span>
                             </div>
-                            <div className="text-right text-sm text-white/60">
-                                {format(new Date(transaction.date), "MMM d, yyyy")}
+                            <div className="flex justify-end gap-1">
+                                {transaction.tags.slice(0, 2).map((tag) => (
+                                    <span
+                                        key={tag}
+                                        className="inline-block rounded-full bg-white/10 px-2 py-1 text-xs font-medium text-white"
+                                    >
+                                        {tag}
+                                    </span>
+                                ))}
+                                {transaction.tags.length > 2 && (
+                                    <span className="inline-block rounded-full bg-white/10 px-2 py-1 text-xs font-medium text-white">
+                                        +{transaction.tags.length - 2}
+                                    </span>
+                                )}
                             </div>
                         </motion.div>
                     ))}
