@@ -1,16 +1,20 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { useEffect, useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react"
+import { ShoppingCart, X, Plus, Minus, Trash2, Loader2 } from "lucide-react"
 import { useCart } from "@/contexts/CartContext"
 import { Button } from "@/components/ui/button"
 import { useLocation } from "react-router-dom"
+import { paymentService } from "@/api/payment"
+import { toast } from "sonner"
 
 export function CartDrawer() {
     const { cartItems, totalPrice, isOpen, toggleCart, removeItem, updateQuantity } = useCart()
     const [mounted, setMounted] = useState(false)
     const drawerRef = useRef<HTMLDivElement>(null)
+    const [isCheckingOut, setIsCheckingOut] = useState(false)
 
     // Handle hydration
     useEffect(() => {
@@ -37,6 +41,20 @@ export function CartDrawer() {
     const location = useLocation()
     const hideOnRoutes = ["/login", "/register"]
     const shouldShow = !hideOnRoutes.includes(location.pathname)
+
+    const handleCheckout = async () => {
+        try {
+            setIsCheckingOut(true)
+            const response = await paymentService.checkout()
+            if (response.success && response.url) {
+                window.location.href = response.url
+            }
+        } catch (error) {
+            toast.error("Failed to process checkout. Please try again.")
+        } finally {
+            setIsCheckingOut(false)
+        }
+    }
 
     if (!mounted || !shouldShow) return null
 
@@ -156,12 +174,18 @@ export function CartDrawer() {
                                             <span className="text-lg font-medium text-white">{totalPrice.toLocaleString("vi-VN")} ₫</span>
                                         </div>
                                         <Button
-                                            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 py-6 text-white transition-transform hover:scale-[1.02]"
-                                            onClick={() => {
-                                                // Handle checkout
-                                            }}
+                                            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 py-6 text-white transition-transform hover:scale-[1.02] disabled:opacity-50"
+                                            onClick={handleCheckout}
+                                            disabled={isCheckingOut}
                                         >
-                                            Proceed to Checkout
+                                            {isCheckingOut ? (
+                                                <div className="flex items-center gap-2">
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                    Processing...
+                                                </div>
+                                            ) : (
+                                                "Proceed to Checkout"
+                                            )}
                                         </Button>
                                     </div>
                                 )}
