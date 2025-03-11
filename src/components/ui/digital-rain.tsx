@@ -21,8 +21,7 @@ const DigitalRain: React.FC<DigitalRainProps> = ({ color = "#0f0", speed = 1, de
         if (!ctx) return
 
         let animationFrameId: number
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        let columns: number[] = []
+        //let columns: number[] = []
         let drops: number[] = []
         const fontSize = 14
 
@@ -32,7 +31,7 @@ const DigitalRain: React.FC<DigitalRainProps> = ({ color = "#0f0", speed = 1, de
 
             // Calculate columns and initialize drops
             const columns_count = Math.floor(canvas.width / fontSize)
-            columns = Array.from({ length: columns_count }, () => 0)
+            //columns = Array.from({ length: columns_count }, () => 0)
             drops = Array.from({ length: columns_count }, () => 1)
 
             // Set font

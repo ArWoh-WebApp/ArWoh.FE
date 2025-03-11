@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 export default function NotFound() {
   const navigate = useNavigate()
   const [hoverIntensity, setHoverIntensity] = useState(0.7)
-  const [enableHover, setEnableHover] = useState(true)
+  const [enableHover] = useState(true)
 
   // Randomly change the hover intensity for a glitchy effect
   useEffect(() => {
