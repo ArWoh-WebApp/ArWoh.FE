@@ -2,7 +2,9 @@
 
 import { motion } from "framer-motion"
 import BlurText from "@/components/ui/blur-text"
-import HeroImg from "@/assets/images/heroImage.png"
+import heroGif from "@/assets/images/hero.gif"
+
+//const heroImg = "https://minio.ae-tao-fullstack-api.site/api/v1/buckets/arwoh-bucket/objects/download?preview=true&prefix=landingPage%2Fhero.png&version_id=null"
 
 export default function HeroSection() {
 	return (
@@ -39,7 +41,7 @@ export default function HeroSection() {
 
 			{/* Background artwork - removed drop shadow */}
 			<div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-[80vh]">
-				<img src={HeroImg || "/placeholder.svg"} alt="3D Artwork" className="w-full h-full object-contain" />
+				<img src={heroGif || "/placeholder.svg"} alt="3D Artwork" className="w-full h-full object-contain" />
 			</div>
 
 			{/* Content */}
