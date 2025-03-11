@@ -29,7 +29,7 @@ export default function Header() {
 				{/* Logo */}
 				<div className="flex-shrink-0">
 					<Button variant="link" onClick={() => navigate("/")}>
-						<img src={logoImage || "/placeholder.svg"} alt="ArWoh" className="h-6" />
+						<img src={logoImage || "/placeholder.svg"} alt="ArWoh" className="h-8" />
 					</Button>
 				</div>
 
