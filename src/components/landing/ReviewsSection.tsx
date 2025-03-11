@@ -1,8 +1,9 @@
 "use client"
 import { motion } from "framer-motion"
 import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards"
-import userAvt from "@/assets/images/user.png"
 import { Star } from "lucide-react"
+
+const tienAvt = "https://minio.ae-tao-fullstack-api.site/api/v1/buckets/arwoh-bucket/objects/download?preview=true&prefix=landingPage%2FUntitled.png&version_id=null"
 
 const reviews = [
 	{
@@ -10,56 +11,56 @@ const reviews = [
 		text: "The quality of the postcards exceeded my expectations!",
 		author: "Emily Johnson",
 		role: "Designer, Art Co.",
-		avatar: userAvt,
+		avatar: tienAvt,
 	},
 	{
 		rating: 4,
 		text: "The 3D mockup feature helped me choose perfectly!",
 		author: "Michael Smith",
 		role: "Manager, Creative Hub",
-		avatar: userAvt,
+		avatar: tienAvt,
 	},
 	{
 		rating: 5,
 		text: "I love the variety and creativity in their products!",
 		author: "Sarah Lee",
 		role: "Owner, Print Shop",
-		avatar: userAvt,
+		avatar: tienAvt,
 	},
 	{
 		rating: 5,
 		text: "ArWoh's artwork transformed my living space completely!",
 		author: "Alex Chen",
 		role: "Interior Designer",
-		avatar: userAvt,
+		avatar: tienAvt,
 	},
 	{
 		rating: 4,
 		text: "Great customer service and quick delivery. Will order again!",
 		author: "Jessica Brown",
 		role: "Art Enthusiast",
-		avatar: userAvt,
+		avatar: tienAvt,
 	},
 	{
 		rating: 5,
 		text: "The customization options are fantastic. Got exactly what I wanted!",
 		author: "David Wilson",
 		role: "Corporate Client",
-		avatar: userAvt,
+		avatar: tienAvt,
 	},
 	{
 		rating: 5,
 		text: "ArWoh's designs are truly unique. A great conversation starter!",
 		author: "Emma Thompson",
 		role: "Cafe Owner",
-		avatar: userAvt,
+		avatar: tienAvt,
 	},
 	{
 		rating: 4,
 		text: "Impressive quality and attention to detail in every piece.",
 		author: "Ryan Garcia",
 		role: "Photographer",
-		avatar: userAvt,
+		avatar: tienAvt,
 	},
 ]
 
