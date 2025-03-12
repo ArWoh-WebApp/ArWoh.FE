@@ -1,58 +1,66 @@
 "use client"
 
-import type React from "react";
-import { useState, useCallback, memo, useRef } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import Iridescence from "@/components/ui/iridescence";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import type React from "react"
+import { useState, useCallback, memo, useRef } from "react"
+import { Eye, EyeOff } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import Iridescence from "@/components/ui/iridescence"
+import { useAuth } from "@/contexts/AuthContext"
+import { useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 
-import logoImage from "@/assets/images/logo.png";
+import logoImage from "@/assets/images/logo.png"
 
 // Memoized Iridescence to prevent unnecessary re-renders
-const MemoizedIridescence = memo(Iridescence);
+const MemoizedIridescence = memo(Iridescence)
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-  const { login } = useAuth();
-  const emailRef = useRef<HTMLInputElement | null>(null);
-  const passwordRef = useRef<HTMLInputElement | null>(null);
+  const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
+  const { login, isPhotographer, isAdmin } = useAuth()
+  const emailRef = useRef<HTMLInputElement | null>(null)
+  const passwordRef = useRef<HTMLInputElement | null>(null)
 
   const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (emailRef.current) emailRef.current.value = e.target.value;
-    setEmail(e.target.value);
-  }, []);
+    if (emailRef.current) emailRef.current.value = e.target.value
+    setEmail(e.target.value)
+  }, [])
 
   const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (passwordRef.current) passwordRef.current.value = e.target.value;
-    setPassword(e.target.value);
-  }, []);
-
+    if (passwordRef.current) passwordRef.current.value = e.target.value
+    setPassword(e.target.value)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+    e.preventDefault()
+    setIsLoading(true)
 
     try {
-      const success = await login(email, password);
+      const success = await login(email, password)
       if (success) {
-        setTimeout(() => navigate("/"), 100); // Delay navigation to avoid UI flicker
+        // Redirect based on user role
+        setTimeout(() => {
+          if (isPhotographer) {
+            navigate("/photographer")
+          } else if (isAdmin) {
+            navigate("/admin") 
+          } else {
+            navigate("/user-profile")
+          }
+        }, 100) // Delay navigation to avoid UI flicker
       }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login error:", error)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <main className="min-h-screen w-full relative bg-[#0D0D0D] overflow-hidden">
@@ -138,15 +146,16 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
-  );
+  )
 }
 
 const LabelInputContainer = ({
   children,
   className,
 }: {
-  children: React.ReactNode;
-  className?: string;
+  children: React.ReactNode
+  className?: string
 }) => {
-  return <div className={cn("flex flex-col space-y-2 w-full", className)}>{children}</div>;
-};
+  return <div className={cn("flex flex-col space-y-2 w-full", className)}>{children}</div>
+}
+

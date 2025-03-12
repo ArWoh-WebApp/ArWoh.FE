@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 import axiosInstance from "./axiosInstance"
 
-const PROFILE_API = "/users/profile"
+const PROFILE_API = "/users/me/profile"
 const UPDATE_AVATAR_API = "/users/me/avatar"
 const USER_TRANSACTIONS_API = "/images/bought-by-user"
 
@@ -17,7 +17,7 @@ export namespace UserService {
         id: number
         username: string
         email: string
-        role: "Customer" | "Photographer"
+        role: number
         bio: string | null
         profilePictureUrl: string | null
         createdAt: string

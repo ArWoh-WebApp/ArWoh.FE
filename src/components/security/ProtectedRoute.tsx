@@ -9,10 +9,17 @@ import { Loader2 } from "lucide-react"
 interface ProtectedRouteProps {
     children: React.ReactNode
     requireAuth?: boolean
+    requirePhotographer?: boolean
+    requireAdmin?: boolean
 }
 
-export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteProps) {
-    const { isAuthenticated, isLoading } = useAuth()
+export function ProtectedRoute({
+    children,
+    requireAuth = true,
+    requirePhotographer = false,
+    requireAdmin = false,
+}: ProtectedRouteProps) {
+    const { isAuthenticated, isLoading, isPhotographer, isAdmin } = useAuth()
     const navigate = useNavigate()
     const [shouldRender, setShouldRender] = useState(false)
 
@@ -21,11 +28,31 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
 
         const checkAuth = async () => {
             if (!isLoading) {
+                // Check if authentication is required but user is not authenticated
                 if (requireAuth && !isAuthenticated) {
                     navigate("/login", { replace: true })
-                } else if (!requireAuth && isAuthenticated) {
-                    navigate("/", { replace: true })
-                } else if (mounted) {
+                }
+                // Check if photographer role is required but user is not a photographer
+                else if (requireAuth && requirePhotographer && !isPhotographer) {
+                    navigate("/user-profile", { replace: true })
+                }
+                // Check if admin role is required but user is not an admin
+                else if (requireAuth && requireAdmin && !isAdmin) {
+                    navigate("/user-profile", { replace: true })
+                }
+                // Check if user is authenticated but shouldn't be (like login page)
+                else if (!requireAuth && isAuthenticated) {
+                    // Redirect to appropriate dashboard based on role
+                    if (isAdmin) {
+                        navigate("/admin", { replace: true })
+                    } else if (isPhotographer) {
+                        navigate("/photographer", { replace: true })
+                    } else {
+                        navigate("/user-profile", { replace: true })
+                    }
+                }
+                // All checks passed, render the component
+                else if (mounted) {
                     setShouldRender(true)
                 }
             }
@@ -36,7 +63,7 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
         return () => {
             mounted = false
         }
-    }, [isAuthenticated, isLoading, navigate, requireAuth])
+    }, [isAuthenticated, isLoading, isPhotographer, isAdmin, navigate, requireAuth, requirePhotographer, requireAdmin])
 
     if (isLoading || !shouldRender) {
         return (
