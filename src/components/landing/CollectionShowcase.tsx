@@ -4,10 +4,8 @@ import { motion } from "framer-motion"
 import { ThreeDCard } from "@/components/ui/3d-card"
 import { ArrowRight } from "lucide-react"
 
-// const collectionImg =
-// 	"https://minio.ae-tao-fullstack-api.site/api/v1/buckets/arwoh-bucket/objects/download?preview=true&prefix=landingPage%2Fjun-kim-2.jpg&version_id=null"
+const collectionImg = "https://minio.ae-tao-fullstack-api.site/api/v1/buckets/arwoh-bucket/objects/download?preview=true&prefix=landingPage%2Fjun-kim-2.jpg&version_id=null"
 
-const collectionImg = "https://minio.ae-tao-fullstack-api.site/api/v1/buckets/arwoh-bucket/objects/download?preview=true&prefix=landingPage%2FUntitled.png&version_id=null"
 export default function CollectionShowcase() {
 	return (
 		<section className="py-24 relative overflow-hidden">

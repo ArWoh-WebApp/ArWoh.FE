@@ -15,6 +15,7 @@ export function CartDrawer() {
     const [mounted, setMounted] = useState(false)
     const drawerRef = useRef<HTMLDivElement>(null)
     const [isCheckingOut, setIsCheckingOut] = useState(false)
+    const location = useLocation()
 
     // Handle hydration
     useEffect(() => {
@@ -38,9 +39,12 @@ export function CartDrawer() {
         }
     }, [isOpen, toggleCart])
 
-    const location = useLocation()
-    const hideOnRoutes = ["/login", "/register"]
-    const shouldShow = !hideOnRoutes.includes(location.pathname)
+    // Check if we should show the cart button (only on art-gallery page)
+    const hideOnRoutes = ["/login", "/register", "*"]
+    const showCartButton = location.pathname === "/art-gallery" && !hideOnRoutes.includes(location.pathname)
+
+    // Check if we should render the component at all
+    const shouldRender = !hideOnRoutes.includes(location.pathname)
 
     const handleCheckout = async () => {
         try {
@@ -56,18 +60,20 @@ export function CartDrawer() {
         }
     }
 
-    if (!mounted || !shouldShow) return null
+    if (!mounted || !shouldRender) return null
 
     return (
         <>
-            {/* Cart Toggle Button */}
-            <button
-                onClick={toggleCart}
-                className="fixed right-4 top-28 z-50 flex items-center gap-2 rounded-full bg-white px-4 py-2 text-black shadow-lg transition-transform hover:scale-105"
-            >
-                <ShoppingCart className="h-5 w-5" />
-                <span className="font-medium">{cartItems.length}</span>
-            </button>
+            {/* Cart Toggle Button - Only show on art-gallery page */}
+            {showCartButton && (
+                <button
+                    onClick={toggleCart}
+                    className="fixed right-4 top-28 z-50 flex items-center gap-2 rounded-full bg-white px-4 py-2 text-black shadow-lg transition-transform hover:scale-105"
+                >
+                    <ShoppingCart className="h-5 w-5" />
+                    <span className="font-medium">{cartItems.length}</span>
+                </button>
+            )}
 
             {/* Cart Drawer */}
             <AnimatePresence>

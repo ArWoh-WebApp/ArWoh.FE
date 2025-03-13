@@ -1,58 +1,86 @@
 "use client"
 
-import type React from "react";
-import { useState, useCallback, memo, useRef } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import Iridescence from "@/components/ui/iridescence";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import type React from "react"
+import { useState, useCallback, memo, useRef } from "react"
+import { Eye, EyeOff } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import Iridescence from "@/components/ui/iridescence"
+import { useAuth } from "@/contexts/AuthContext"
+import { useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
+import { Auth } from "@/api/auth"
+import { UserService } from "@/api/user"
+import { toast } from "sonner"
 
-import logoImage from "@/assets/images/logo.png";
+import logoImage from "@/assets/images/logo.png"
 
 // Memoized Iridescence to prevent unnecessary re-renders
-const MemoizedIridescence = memo(Iridescence);
+const MemoizedIridescence = memo(Iridescence)
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-  const { login } = useAuth();
-  const emailRef = useRef<HTMLInputElement | null>(null);
-  const passwordRef = useRef<HTMLInputElement | null>(null);
+  const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
+  const { login } = useAuth()
+  const emailRef = useRef<HTMLInputElement | null>(null)
+  const passwordRef = useRef<HTMLInputElement | null>(null)
 
   const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (emailRef.current) emailRef.current.value = e.target.value;
-    setEmail(e.target.value);
-  }, []);
+    if (emailRef.current) emailRef.current.value = e.target.value
+    setEmail(e.target.value)
+  }, [])
 
   const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (passwordRef.current) passwordRef.current.value = e.target.value;
-    setPassword(e.target.value);
-  }, []);
-
+    if (passwordRef.current) passwordRef.current.value = e.target.value
+    setPassword(e.target.value)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+    e.preventDefault()
+    setIsLoading(true)
 
     try {
-      const success = await login(email, password);
-      if (success) {
-        setTimeout(() => navigate("/"), 100); // Delay navigation to avoid UI flicker
+      // First, attempt to login
+      const loginResponse = await Auth.login({ email, password })
+
+      if (loginResponse.isSuccess) {
+        // If login is successful, fetch the user profile directly
+        const userProfileResponse = await UserService.getUserProfile()
+
+        if (userProfileResponse.isSuccess) {
+          const userData = userProfileResponse.data
+
+          // Call the login function from context to update the global state
+          await login(email, password)
+
+          // Redirect based on the user role from the response
+          if (userData.role === "Admin") {
+            navigate("/admin")
+          } else if (userData.role === "Photographer") {
+            navigate("/photographer-profile")
+          } else {
+            navigate("/user-profile")
+          }
+
+          toast.success("Login successful")
+        } else {
+          toast.error("Failed to fetch user profile")
+        }
+      } else {
+        toast.error(loginResponse.message || "Login failed")
       }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login error:", error)
+      toast.error("An error occurred during login")
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <main className="min-h-screen w-full relative bg-[#0D0D0D] overflow-hidden">
@@ -138,15 +166,16 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
-  );
+  )
 }
 
 const LabelInputContainer = ({
   children,
   className,
 }: {
-  children: React.ReactNode;
-  className?: string;
+  children: React.ReactNode
+  className?: string
 }) => {
-  return <div className={cn("flex flex-col space-y-2 w-full", className)}>{children}</div>;
-};
+  return <div className={cn("flex flex-col space-y-2 w-full", className)}>{children}</div>
+}
+

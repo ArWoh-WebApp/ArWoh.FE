@@ -17,9 +17,10 @@ import { CartDrawer } from "./components/cart/CartDrawer"
 import { AuthProvider } from "./contexts/AuthContext"
 import { ProtectedRoute } from "./components/security/ProtectedRoute"
 import UserPage from "./pages/UserPage"
+import PhotographerPage from "./pages/PhotographerPage"
 
 // Define valid routes
-const validRoutes = ["/", "/login", "/register", "/art-gallery", "/user-profile", "/not-found"]
+const validRoutes = ["/", "/login", "/register", "/art-gallery", "/user-profile", "/photographer-profile", "/not-found"]
 
 const AppContent: React.FC = () => {
 	const location = useLocation()
@@ -28,7 +29,7 @@ const AppContent: React.FC = () => {
 	const showHeaderFooter = isValidRoute && !isAuthPage
 
 	return (
-		<div className="min-h-screen flex flex-col">
+		<div className="flex min-h-screen flex-col">
 			{showHeaderFooter && <Header />}
 			<main className="flex-1">
 				<AnimatePresence mode="wait" initial={false}>
@@ -45,17 +46,21 @@ const AppContent: React.FC = () => {
 						<Route
 							path="/login"
 							element={
-								<PageTransition>
-									<Login />
-								</PageTransition>
+								<ProtectedRoute requireAuth={false}>
+									<PageTransition>
+										<Login />
+									</PageTransition>
+								</ProtectedRoute>
 							}
 						/>
 						<Route
 							path="/register"
 							element={
-								<PageTransition>
-									<Register />
-								</PageTransition>
+								<ProtectedRoute requireAuth={false}>
+									<PageTransition>
+										<Register />
+									</PageTransition>
+								</ProtectedRoute>
 							}
 						/>
 						<Route
@@ -71,9 +76,19 @@ const AppContent: React.FC = () => {
 						<Route
 							path="/user-profile"
 							element={
-								<ProtectedRoute>
+								<ProtectedRoute requireAuth={true} requirePhotographer={false} requireAdmin={false}>
 									<PageTransition>
 										<UserPage />
+									</PageTransition>
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/photographer-profile"
+							element={
+								<ProtectedRoute requireAuth={true} requirePhotographer={true} requireAdmin={false}>
+									<PageTransition>
+										<PhotographerPage />
 									</PageTransition>
 								</ProtectedRoute>
 							}

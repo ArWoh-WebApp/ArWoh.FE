@@ -1,5 +1,7 @@
+"use client"
+
 import { useNavigate } from "react-router-dom"
-import { ChevronDown, LogOut, UserCircle, Loader2 } from "lucide-react"
+import { ChevronDown, LogOut, UserCircle, Camera, Shield, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
 	DropdownMenu,
@@ -16,11 +18,21 @@ import logoImage from "@/assets/images/logo.png"
 
 export default function Header() {
 	const navigate = useNavigate()
-	const { isAuthenticated, user, logout, isLoading } = useAuth()
+	const { isAuthenticated, user, logout, isLoading, isPhotographer, isAdmin } = useAuth()
 
 	const handleLogout = async () => {
 		logout()
 		navigate("/login")
+	}
+
+	const handleProfileClick = () => {
+		if (isAdmin) {
+			navigate("/admin") // Add admin route if needed
+		} else if (isPhotographer) {
+			navigate("/photographer-profile") // Updated to the correct route
+		} else {
+			navigate("/user-profile")
+		}
 	}
 
 	return (
@@ -93,15 +105,25 @@ export default function Header() {
 									<div className="flex flex-col space-y-1">
 										<p className="text-sm font-medium">{user.username}</p>
 										<p className="text-xs text-gray-400">{user.email}</p>
+										{isAdmin && (
+											<p className="text-xs text-red-400 flex items-center">
+												<Shield className="mr-1 h-3 w-3" /> Admin
+											</p>
+										)}
+										{isPhotographer && (
+											<p className="text-xs text-purple-400 flex items-center">
+												<Camera className="mr-1 h-3 w-3" /> Photographer
+											</p>
+										)}
 									</div>
 								</DropdownMenuLabel>
 								<DropdownMenuSeparator className="bg-white/10" />
 								<DropdownMenuItem
 									className="text-white focus:bg-white/10 focus:text-white"
-									onClick={() => navigate("/user-profile")}
+									onClick={handleProfileClick}
 								>
 									<UserCircle className="mr-2 h-4 w-4" />
-									Profile
+									{isAdmin ? "Admin Dashboard" : isPhotographer ? "Photographer Profile" : "Profile"}
 								</DropdownMenuItem>
 								<DropdownMenuItem className="text-red-500 focus:bg-white/10 focus:text-red-500" onClick={handleLogout}>
 									<LogOut className="mr-2 h-4 w-4" />
