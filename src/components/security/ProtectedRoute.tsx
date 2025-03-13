@@ -26,6 +26,7 @@ export function ProtectedRoute({
     useEffect(() => {
         let mounted = true
 
+        // Vallidate tất cả trường hợp
         const checkAuth = async () => {
             if (!isLoading) {
                 // Check if authentication is required but user is not authenticated
@@ -46,7 +47,7 @@ export function ProtectedRoute({
                     if (isAdmin) {
                         navigate("/admin", { replace: true })
                     } else if (isPhotographer) {
-                        navigate("/photographer", { replace: true })
+                        navigate("/photographer-profile", { replace: true }) // Updated to the correct route
                     } else {
                         navigate("/user-profile", { replace: true })
                     }

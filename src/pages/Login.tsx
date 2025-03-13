@@ -11,6 +11,9 @@ import Iridescence from "@/components/ui/iridescence"
 import { useAuth } from "@/contexts/AuthContext"
 import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
+import { Auth } from "@/api/auth"
+import { UserService } from "@/api/user"
+import { toast } from "sonner"
 
 import logoImage from "@/assets/images/logo.png"
 
@@ -23,7 +26,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
-  const { login, isPhotographer, isAdmin } = useAuth()
+  const { login } = useAuth()
   const emailRef = useRef<HTMLInputElement | null>(null)
   const passwordRef = useRef<HTMLInputElement | null>(null)
 
@@ -42,21 +45,38 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const success = await login(email, password)
-      if (success) {
-        // Redirect based on user role
-        setTimeout(() => {
-          if (isPhotographer) {
-            navigate("/photographer")
-          } else if (isAdmin) {
-            navigate("/admin") 
+      // First, attempt to login
+      const loginResponse = await Auth.login({ email, password })
+
+      if (loginResponse.isSuccess) {
+        // If login is successful, fetch the user profile directly
+        const userProfileResponse = await UserService.getUserProfile()
+
+        if (userProfileResponse.isSuccess) {
+          const userData = userProfileResponse.data
+
+          // Call the login function from context to update the global state
+          await login(email, password)
+
+          // Redirect based on the user role from the response
+          if (userData.role === "Admin") {
+            navigate("/admin")
+          } else if (userData.role === "Photographer") {
+            navigate("/photographer-profile")
           } else {
             navigate("/user-profile")
           }
-        }, 100) // Delay navigation to avoid UI flicker
+
+          toast.success("Login successful")
+        } else {
+          toast.error("Failed to fetch user profile")
+        }
+      } else {
+        toast.error(loginResponse.message || "Login failed")
       }
     } catch (error) {
       console.error("Login error:", error)
+      toast.error("An error occurred during login")
     } finally {
       setIsLoading(false)
     }

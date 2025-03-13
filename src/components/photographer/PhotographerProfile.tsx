@@ -2,16 +2,29 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Camera, MapPin, LinkIcon, Loader2 } from "lucide-react"
+import { Camera, MapPin, Loader2 } from "lucide-react"
 import { photographerService } from "@/api/photographer"
 import type { UserService } from "@/api/user"
 import type { PhotographerImage } from "@/api/photographer"
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination"
 
 export function PhotographerProfile() {
     const [profile, setProfile] = useState<UserService.User | null>(null)
     const [images, setImages] = useState<PhotographerImage[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [selectedImage, setSelectedImage] = useState<PhotographerImage | null>(null)
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1)
+    const imagesPerPage = 6 // Show 6 images per page (2 rows of 3 on desktop)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -38,6 +51,56 @@ export function PhotographerProfile() {
         fetchData()
     }, [])
 
+    // Calculate pagination
+    const totalPages = Math.ceil(images.length / imagesPerPage)
+    const indexOfLastImage = currentPage * imagesPerPage
+    const indexOfFirstImage = indexOfLastImage - imagesPerPage
+    const currentImages = images.slice(indexOfFirstImage, indexOfLastImage)
+
+    // Pagination handlers
+    const goToPage = (page: number) => {
+        setCurrentPage(page)
+        // Scroll to top of grid
+        window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+
+    // Generate page numbers for pagination
+    const getPageNumbers = () => {
+        const pageNumbers = []
+
+        if (totalPages <= 5) {
+            // If 5 or fewer pages, show all
+            for (let i = 1; i <= totalPages; i++) {
+                pageNumbers.push(i)
+            }
+        } else {
+            // Always show first page
+            pageNumbers.push(1)
+
+            // If current page is 1 or 2, show 1, 2, 3, ..., totalPages
+            if (currentPage < 3) {
+                pageNumbers.push(2, 3)
+                pageNumbers.push("ellipsis")
+            }
+            // If current page is close to last page, show 1, ..., totalPages-2, totalPages-1, totalPages
+            else if (currentPage > totalPages - 2) {
+                pageNumbers.push("ellipsis")
+                pageNumbers.push(totalPages - 2, totalPages - 1)
+            }
+            // Otherwise show 1, ..., currentPage-1, currentPage, currentPage+1, ..., totalPages
+            else {
+                pageNumbers.push("ellipsis")
+                pageNumbers.push(currentPage - 1, currentPage, currentPage + 1)
+                pageNumbers.push("ellipsis")
+            }
+
+            // Always show last page
+            pageNumbers.push(totalPages)
+        }
+
+        return pageNumbers
+    }
+
     if (isLoading) {
         return (
             <div className="flex h-[200px] items-center justify-center">
@@ -47,7 +110,9 @@ export function PhotographerProfile() {
     }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 pb-40">
+            {" "}
+            {/* Increased bottom padding to 24 (6rem) */}
             {/* Profile Header */}
             <div className="flex flex-col gap-8 md:flex-row md:items-start md:gap-12">
                 {/* Avatar */}
@@ -65,14 +130,6 @@ export function PhotographerProfile() {
                 <div className="flex-1 space-y-4">
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-8">
                         <h1 className="text-2xl font-semibold">{profile?.username}</h1>
-                        <div className="flex gap-4">
-                            <button className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700">
-                                Follow
-                            </button>
-                            <button className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10">
-                                Message
-                            </button>
-                        </div>
                     </div>
 
                     {/* Stats */}
@@ -93,7 +150,6 @@ export function PhotographerProfile() {
 
                     {/* Bio */}
                     <div className="space-y-2">
-                        <div className="font-medium">{profile?.username}</div>
                         <div className="text-sm text-white/60">{profile?.bio || "No bio yet"}</div>
                         <div className="flex flex-wrap gap-4 text-sm text-white/80">
                             <div className="flex items-center gap-1">
@@ -104,37 +160,73 @@ export function PhotographerProfile() {
                                 <MapPin className="h-4 w-4" />
                                 <span>Vietnam</span>
                             </div>
-                            <div className="flex items-center gap-1">
-                                <LinkIcon className="h-4 w-4" />
-                                <a href="#" className="text-purple-400 hover:underline">
-                                    portfolio.com
-                                </a>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            {/* Photo Grid with Pagination */}
+            <div className="space-y-6">
+                {/* Grid Header */}
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-white">Photos</h2>
+                    <div className="text-sm text-white/60">
+                        Showing {indexOfFirstImage + 1}-{Math.min(indexOfLastImage, images.length)} of {images.length}
+                    </div>
+                </div>
 
-            {/* Photo Grid */}
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-                {images.map((image) => (
-                    <motion.div
-                        key={image.id}
-                        layoutId={`image-${image.id}`}
-                        className="group relative aspect-square cursor-pointer overflow-hidden rounded-lg"
-                        onClick={() => setSelectedImage(image)}
-                    >
-                        <img src={image.url || "/placeholder.svg"} alt={image.title} className="h-full w-full object-cover" />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
-                            <div className="flex h-full flex-col items-center justify-center gap-2 p-4 text-center">
-                                <h3 className="text-sm font-medium text-white">{image.title}</h3>
-                                <p className="text-xs text-white/80">{image.price.toLocaleString("vi-VN")} ₫</p>
+                {/* Photo Grid */}
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                    {currentImages.map((image) => (
+                        <motion.div
+                            key={image.id}
+                            layoutId={`image-${image.id}`}
+                            className="group relative aspect-square cursor-pointer overflow-hidden rounded-lg"
+                            onClick={() => setSelectedImage(image)}
+                        >
+                            <img src={image.url || "/placeholder.svg"} alt={image.title} className="h-full w-full object-cover" />
+                            <div className="absolute inset-0 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
+                                <div className="flex h-full flex-col items-center justify-center gap-2 p-4 text-center">
+                                    <h3 className="text-sm font-medium text-white">{image.title}</h3>
+                                    <p className="text-xs text-white/80">{image.price.toLocaleString("vi-VN")} ₫</p>
+                                </div>
                             </div>
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
+                        </motion.div>
+                    ))}
+                </div>
 
+                {/* Shadcn Pagination */}
+                {totalPages > 1 && (
+                    <Pagination className="mt-8">
+                        <PaginationContent>
+                            {currentPage > 1 && (
+                                <PaginationItem>
+                                    <PaginationPrevious onClick={() => goToPage(currentPage - 1)} />
+                                </PaginationItem>
+                            )}
+
+                            {getPageNumbers().map((page, index) =>
+                                page === "ellipsis" ? (
+                                    <PaginationItem key={`ellipsis-${index}`}>
+                                        <PaginationEllipsis />
+                                    </PaginationItem>
+                                ) : (
+                                    <PaginationItem key={page}>
+                                        <PaginationLink isActive={currentPage === page} onClick={() => goToPage(page as number)}>
+                                            {page}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                ),
+                            )}
+
+                            {currentPage < totalPages && (
+                                <PaginationItem>
+                                    <PaginationNext onClick={() => goToPage(currentPage + 1)} />
+                                </PaginationItem>
+                            )}
+                        </PaginationContent>
+                    </Pagination>
+                )}
+            </div>
             {/* Image Modal */}
             {selectedImage && (
                 <motion.div

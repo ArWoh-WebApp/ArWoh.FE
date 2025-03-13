@@ -29,7 +29,7 @@ export default function Header() {
 		if (isAdmin) {
 			navigate("/admin") // Add admin route if needed
 		} else if (isPhotographer) {
-			navigate("/photographer")
+			navigate("/photographer-profile") // Updated to the correct route
 		} else {
 			navigate("/user-profile")
 		}
@@ -123,7 +123,7 @@ export default function Header() {
 									onClick={handleProfileClick}
 								>
 									<UserCircle className="mr-2 h-4 w-4" />
-									{isAdmin ? "Admin Dashboard" : isPhotographer ? "Photographer Dashboard" : "Profile"}
+									{isAdmin ? "Admin Dashboard" : isPhotographer ? "Photographer Profile" : "Profile"}
 								</DropdownMenuItem>
 								<DropdownMenuItem className="text-red-500 focus:bg-white/10 focus:text-red-500" onClick={handleLogout}>
 									<LogOut className="mr-2 h-4 w-4" />

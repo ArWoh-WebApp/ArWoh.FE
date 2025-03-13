@@ -51,7 +51,9 @@ export default function PhotographerPage() {
                 </div>
 
                 {/* Content */}
-                <div className="relative">
+                <div className="relative min-h-[calc(100vh-300px)]">
+                    {" "}
+                    {/* Increased min-height to ensure content area has enough space */}
                     <AnimatedTabContent isVisible={activeTab === "profile"}>
                         <PhotographerProfile />
                     </AnimatedTabContent>
@@ -74,8 +76,8 @@ function AnimatedTabContent({
     return (
         <div
             className={cn(
-                "absolute inset-0 transition-opacity duration-300",
-                isVisible ? "opacity-100" : "pointer-events-none opacity-0",
+                "transition-opacity duration-300",
+                isVisible ? "block opacity-100" : "hidden opacity-0",
             )}
         >
             {children}

@@ -43,10 +43,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const response = await UserService.getUserProfile()
             if (response.isSuccess) {
                 setUser(response.data)
-                // Check user roles based on numeric values
-                setIsPhotographer(response.data.role === 1) // 1 = photographer
-                setIsAdmin(response.data.role === 2) // 2 = admin
+                // Check user roles based on string values
+                setIsPhotographer(response.data.role === "Photographer")
+                setIsAdmin(response.data.role === "Admin")
                 setIsAuthenticated(true)
+                console.log("User role:", response.data.role, "isPhotographer:", response.data.role === "Photographer")
             } else {
                 throw new Error(response.message)
             }
@@ -65,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const token = Auth.getToken()
             if (token) {
                 try {
-                    await axiosInstance.get("/users/profile") // Validate token with API
+                    await axiosInstance.get("/users/me/profile") // Validate token with API
                     await loadUserData()
                 } catch (error) {
                     console.error("Token validation failed:", error)
@@ -83,7 +84,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             const response = await Auth.login({ email, password })
             if (response.isSuccess) {
-                await loadUserData()
+                // Immediately fetch user data to get the role
+                const userResponse = await UserService.getUserProfile()
+                if (userResponse.isSuccess) {
+                    setUser(userResponse.data)
+                    setIsPhotographer(userResponse.data.role === "Photographer")
+                    setIsAdmin(userResponse.data.role === "Admin")
+                    setIsAuthenticated(true)
+                    console.log("Login successful, role:", userResponse.data.role)
+                }
                 toast.success("Login successful")
                 return true
             }
@@ -112,9 +121,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!prev) return null
             const updated = { ...prev, ...updatedUser }
             // Update role status if role is updated
-            if (updatedUser.role !== undefined) {
-                setIsPhotographer(updatedUser.role === 1)
-                setIsAdmin(updatedUser.role === 2)
+            if (updatedUser.role) {
+                setIsPhotographer(updatedUser.role === "Photographer")
+                setIsAdmin(updatedUser.role === "Admin")
             }
             return updated
         })

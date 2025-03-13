@@ -20,7 +20,7 @@ import UserPage from "./pages/UserPage"
 import PhotographerPage from "./pages/PhotographerPage"
 
 // Define valid routes
-const validRoutes = ["/", "/login", "/register", "/art-gallery", "/user-profile", "/photographer", "/not-found"]
+const validRoutes = ["/", "/login", "/register", "/art-gallery", "/user-profile", "/photographer-profile", "/not-found"]
 
 const AppContent: React.FC = () => {
 	const location = useLocation()
@@ -29,7 +29,7 @@ const AppContent: React.FC = () => {
 	const showHeaderFooter = isValidRoute && !isAuthPage
 
 	return (
-		<div className="min-h-screen flex flex-col">
+		<div className="flex min-h-screen flex-col">
 			{showHeaderFooter && <Header />}
 			<main className="flex-1">
 				<AnimatePresence mode="wait" initial={false}>
@@ -76,7 +76,7 @@ const AppContent: React.FC = () => {
 						<Route
 							path="/user-profile"
 							element={
-								<ProtectedRoute requireAuth={true} requirePhotographer={false}>
+								<ProtectedRoute requireAuth={true} requirePhotographer={false} requireAdmin={false}>
 									<PageTransition>
 										<UserPage />
 									</PageTransition>
@@ -84,9 +84,9 @@ const AppContent: React.FC = () => {
 							}
 						/>
 						<Route
-							path="/photographer"
+							path="/photographer-profile"
 							element={
-								<ProtectedRoute requireAuth={true} requirePhotographer={true}>
+								<ProtectedRoute requireAuth={true} requirePhotographer={true} requireAdmin={false}>
 									<PageTransition>
 										<PhotographerPage />
 									</PageTransition>
@@ -111,21 +111,16 @@ const AppContent: React.FC = () => {
 	)
 }
 
-// Wrapper component to handle auth provider
-const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-	return <AuthProvider>{children}</AuthProvider>
-}
-
 const App: React.FC = () => {
 	return (
 		<Router>
-			<AuthWrapper>
+			<AuthProvider>
 				<CartProvider>
 					<AppContent />
 					<CartDrawer />
 					<Toaster />
 				</CartProvider>
-			</AuthWrapper>
+			</AuthProvider>
 		</Router>
 	)
 }

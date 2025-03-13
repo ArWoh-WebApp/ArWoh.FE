@@ -17,7 +17,7 @@ export namespace UserService {
         id: number
         username: string
         email: string
-        role: number
+        role: "Customer" | "Photographer" | "Admin"
         bio: string | null
         profilePictureUrl: string | null
         createdAt: string
