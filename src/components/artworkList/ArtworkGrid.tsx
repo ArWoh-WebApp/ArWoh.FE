@@ -83,7 +83,6 @@ export default function ArtworkList() {
 	const handleAddToCart = () => {
 		if (selectedArtwork) {
 			addItem(selectedArtwork.id, quantity)
-			toast.success("Added to cart!")
 			handleCloseDetail()
 		}
 	}

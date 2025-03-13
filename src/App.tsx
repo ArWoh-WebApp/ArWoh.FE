@@ -11,13 +11,13 @@ import Home from "./pages/Home"
 import { AnimatePresence } from "framer-motion"
 import PageTransition from "./components/animations/PageTransition"
 import ArtworkList from "./pages/ArtworkList"
-import { Toaster } from "./components/ui/sonner"
 import { CartProvider } from "./contexts/CartContext"
 import { CartDrawer } from "./components/cart/CartDrawer"
 import { AuthProvider } from "./contexts/AuthContext"
 import { ProtectedRoute } from "./components/security/ProtectedRoute"
 import UserPage from "./pages/UserPage"
 import PhotographerPage from "./pages/PhotographerPage"
+import { ToastProvider } from "./components/custom/sonner-provider"
 
 // Define valid routes
 const validRoutes = ["/", "/login", "/register", "/art-gallery", "/user-profile", "/photographer-profile", "/not-found"]
@@ -118,7 +118,7 @@ const App: React.FC = () => {
 				<CartProvider>
 					<AppContent />
 					<CartDrawer />
-					<Toaster />
+					<ToastProvider/>
 				</CartProvider>
 			</AuthProvider>
 		</Router>
