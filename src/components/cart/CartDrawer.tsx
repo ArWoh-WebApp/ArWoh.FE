@@ -11,7 +11,7 @@ import { paymentService } from "@/api/payment"
 import { toast } from "sonner"
 
 export function CartDrawer() {
-    const { cartItems, totalPrice, isOpen, toggleCart, removeItem, updateQuantity } = useCart()
+    const { cartItems, totalPrice, isOpen, toggleCart, removeItem, updateQuantity, isCartEnabled } = useCart()
     const [mounted, setMounted] = useState(false)
     const drawerRef = useRef<HTMLDivElement>(null)
     const [isCheckingOut, setIsCheckingOut] = useState(false)
@@ -39,12 +39,13 @@ export function CartDrawer() {
         }
     }, [isOpen, toggleCart])
 
-    // Check if we should show the cart button (only on art-gallery page)
+    // Check if we should show the cart button (only on art-gallery page and for users)
     const hideOnRoutes = ["/login", "/register", "*"]
-    const showCartButton = location.pathname === "/art-gallery" && !hideOnRoutes.includes(location.pathname)
+    const showCartButton =
+        isCartEnabled && location.pathname === "/art-gallery" && !hideOnRoutes.includes(location.pathname)
 
-    // Check if we should render the component at all
-    const shouldRender = !hideOnRoutes.includes(location.pathname)
+    // Check if we should render the component
+    const shouldRender = isCartEnabled && !hideOnRoutes.includes(location.pathname)
 
     const handleCheckout = async () => {
         try {
@@ -64,7 +65,7 @@ export function CartDrawer() {
 
     return (
         <>
-            {/* Cart Toggle Button - Only show on art-gallery page */}
+            {/* Cart Toggle Button - Only show on art-gallery page for users */}
             {showCartButton && (
                 <button
                     onClick={toggleCart}
@@ -77,7 +78,7 @@ export function CartDrawer() {
 
             {/* Cart Drawer */}
             <AnimatePresence>
-                {isOpen && (
+                {isOpen && isCartEnabled && (
                     <>
                         {/* Backdrop */}
                         <motion.div

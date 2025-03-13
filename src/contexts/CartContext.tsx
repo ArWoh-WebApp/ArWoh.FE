@@ -18,24 +18,28 @@ interface CartContextType {
   updateQuantity: (cartItemId: number, quantity: number) => Promise<void>
   clearCart: () => Promise<void>
   toggleCart: () => void
+  isCartEnabled: boolean
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const [cart, setCart] = useState<Cart | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  // Fetch cart when authenticated
+  // Check if the cart should be enabled for this user
+  const isCartEnabled = isAuthenticated && user?.role === "Customer"
+
+  // Fetch cart when authenticated and user has the right role
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && isCartEnabled) {
       fetchCart()
     } else {
       setCart(null)
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, isCartEnabled])
 
   const fetchCart = async () => {
     try {
@@ -57,6 +61,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return
     }
 
+    if (!isCartEnabled) {
+      toast.error("Only users can add items to cart")
+      return
+    }
+
     try {
       setIsLoading(true)
       const dto: CreateCartItemDto = { imageId, quantity }
@@ -74,7 +83,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   const removeItem = async (cartItemId: number) => {
-    if (!isAuthenticated || !cart) return
+    if (!isAuthenticated || !cart || !isCartEnabled) return
 
     try {
       setIsLoading(true)
@@ -91,7 +100,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   const updateQuantity = async (cartItemId: number, quantity: number) => {
-    if (!isAuthenticated || !cart) return
+    if (!isAuthenticated || !cart || !isCartEnabled) return
 
     try {
       setIsLoading(true)
@@ -113,7 +122,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   const clearCart = async () => {
-    if (!isAuthenticated || !cart) return
+    if (!isAuthenticated || !cart || !isCartEnabled) return
 
     try {
       setIsLoading(true)
@@ -134,6 +143,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       toast.error("Please login to view your cart")
       return
     }
+
+    if (!isCartEnabled) {
+      toast.error("Cart is only available for users")
+      return
+    }
+
     setIsOpen(!isOpen)
   }
 
@@ -149,6 +164,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         updateQuantity,
         clearCart,
         toggleCart,
+        isCartEnabled,
       }}
     >
       {children}
