@@ -14,7 +14,16 @@ type Tab = "profile" | "revenue"
 
 export default function PhotographerPage() {
     const [activeTab, setActiveTab] = useState<Tab>("profile")
+    const [tabChangeCount, setTabChangeCount] = useState(0)
     const { isLoading } = useAuth()
+
+    // Increment counter when tab changes to force animation reset
+    const handleTabChange = (tab: Tab) => {
+        if (tab !== activeTab) {
+            setActiveTab(tab)
+            setTabChangeCount((prev) => prev + 1)
+        }
+    }
 
     if (isLoading) {
         return (
@@ -32,7 +41,7 @@ export default function PhotographerPage() {
                     {(["profile", "revenue"] as const).map((tab) => (
                         <button
                             key={tab}
-                            onClick={() => setActiveTab(tab)}
+                            onClick={() => handleTabChange(tab)}
                             className={cn(
                                 "relative px-4 py-2 text-sm font-medium capitalize transition-colors",
                                 activeTab === tab ? "text-white" : "text-white/60 hover:text-white",
@@ -52,12 +61,10 @@ export default function PhotographerPage() {
 
                 {/* Content */}
                 <div className="relative min-h-[calc(100vh-300px)]">
-                    {" "}
-                    {/* Increased min-height to ensure content area has enough space */}
-                    <AnimatedTabContent isVisible={activeTab === "profile"}>
+                    <AnimatedTabContent isVisible={activeTab === "profile"} key={`profile-${tabChangeCount}`}>
                         <PhotographerProfile />
                     </AnimatedTabContent>
-                    <AnimatedTabContent isVisible={activeTab === "revenue"}>
+                    <AnimatedTabContent isVisible={activeTab === "revenue"} key={`revenue-${tabChangeCount}`}>
                         <PhotographerRevenue />
                     </AnimatedTabContent>
                 </div>

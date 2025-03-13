@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { Camera, MapPin, Loader2 } from "lucide-react"
 import { photographerService } from "@/api/photographer"
 import type { UserService } from "@/api/user"
@@ -21,10 +21,17 @@ export function PhotographerProfile() {
     const [images, setImages] = useState<PhotographerImage[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [selectedImage, setSelectedImage] = useState<PhotographerImage | null>(null)
+    const [animationKey, setAnimationKey] = useState(0) // Key to force animation reset
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1)
     const imagesPerPage = 6 // Show 6 images per page (2 rows of 3 on desktop)
+
+    // Reset animation when tab changes
+    useEffect(() => {
+        // This will trigger a re-render and reset animations
+        setAnimationKey((prev) => prev + 1)
+    }, [])
 
     useEffect(() => {
         const fetchData = async () => {
@@ -101,6 +108,30 @@ export function PhotographerProfile() {
         return pageNumbers
     }
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.3,
+            },
+        },
+    }
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                type: "spring",
+                damping: 15,
+                stiffness: 200,
+            },
+        },
+    }
+
     if (isLoading) {
         return (
             <div className="flex h-[200px] items-center justify-center">
@@ -111,88 +142,112 @@ export function PhotographerProfile() {
 
     return (
         <div className="space-y-8 pb-40">
-            {" "}
-            {/* Increased bottom padding to 24 (6rem) */}
             {/* Profile Header */}
-            <div className="flex flex-col gap-8 md:flex-row md:items-start md:gap-12">
-                {/* Avatar */}
-                <div className="flex justify-center md:justify-start">
-                    <div className="relative h-32 w-32 overflow-hidden rounded-full border-2 border-purple-500/30">
-                        <img
-                            src={profile?.profilePictureUrl || "/placeholder.svg"}
-                            alt={profile?.username}
-                            className="h-full w-full object-cover"
-                        />
-                    </div>
-                </div>
-
-                {/* Profile Info */}
-                <div className="flex-1 space-y-4">
-                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-8">
-                        <h1 className="text-2xl font-semibold">{profile?.username}</h1>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="flex gap-8">
-                        <div className="text-center">
-                            <div className="text-xl font-semibold">{images.length}</div>
-                            <div className="text-sm text-white/60">Photos</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-xl font-semibold">2.5k</div>
-                            <div className="text-sm text-white/60">Followers</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-xl font-semibold">180</div>
-                            <div className="text-sm text-white/60">Following</div>
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={`profile-header-${animationKey}`}
+                    className="flex flex-col gap-8 md:flex-row md:items-start md:gap-12"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    {/* Avatar */}
+                    <div className="flex justify-center md:justify-start">
+                        <div className="relative h-32 w-32 overflow-hidden rounded-full border-2 border-purple-500/30">
+                            <img
+                                src={profile?.profilePictureUrl || "/placeholder.svg"}
+                                alt={profile?.username}
+                                className="h-full w-full object-cover"
+                            />
                         </div>
                     </div>
 
-                    {/* Bio */}
-                    <div className="space-y-2">
-                        <div className="text-sm text-white/60">{profile?.bio || "No bio yet"}</div>
-                        <div className="flex flex-wrap gap-4 text-sm text-white/80">
-                            <div className="flex items-center gap-1">
-                                <Camera className="h-4 w-4" />
-                                <span>Photographer</span>
+                    {/* Profile Info */}
+                    <div className="flex-1 space-y-4">
+                        <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-8">
+                            <h1 className="text-2xl font-semibold">{profile?.username}</h1>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="flex gap-8">
+                            <div className="text-center">
+                                <div className="text-xl font-semibold">{images.length}</div>
+                                <div className="text-sm text-white/60">Photos</div>
                             </div>
-                            <div className="flex items-center gap-1">
-                                <MapPin className="h-4 w-4" />
-                                <span>Vietnam</span>
+                            <div className="text-center">
+                                <div className="text-xl font-semibold">100 ních ga</div>
+                                <div className="text-sm text-white/60">Followers</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-xl font-semibold">2£</div>
+                                <div className="text-sm text-white/60">Following</div>
                             </div>
                         </div>
+
+                        {/* Bio */}
+                        <div className="space-y-2">
+                            <div className="text-sm text-white/60">{profile?.bio || "No bio yet"}</div>
+                            <div className="flex flex-wrap gap-4 text-sm text-white/80">
+                                <div className="flex items-center gap-1">
+                                    <Camera className="h-4 w-4" />
+                                    <span>Photographer</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <MapPin className="h-4 w-4" />
+                                    <span>Vietnam</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </motion.div>
+            </AnimatePresence>
+
             {/* Photo Grid with Pagination */}
             <div className="space-y-6">
                 {/* Grid Header */}
-                <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-white">Photos</h2>
-                    <div className="text-sm text-white/60">
-                        Showing {indexOfFirstImage + 1}-{Math.min(indexOfLastImage, images.length)} of {images.length}
-                    </div>
-                </div>
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={`grid-header-${animationKey}`}
+                        className="flex items-center justify-between"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                    >
+                        <h2 className="text-xl font-semibold text-white">Photos</h2>
+                        <div className="text-sm text-white/60">
+                            Showing {indexOfFirstImage + 1}-{Math.min(indexOfLastImage, images.length)} of {images.length}
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
 
                 {/* Photo Grid */}
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-                    {currentImages.map((image) => (
-                        <motion.div
-                            key={image.id}
-                            layoutId={`image-${image.id}`}
-                            className="group relative aspect-square cursor-pointer overflow-hidden rounded-lg"
-                            onClick={() => setSelectedImage(image)}
-                        >
-                            <img src={image.url || "/placeholder.svg"} alt={image.title} className="h-full w-full object-cover" />
-                            <div className="absolute inset-0 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
-                                <div className="flex h-full flex-col items-center justify-center gap-2 p-4 text-center">
-                                    <h3 className="text-sm font-medium text-white">{image.title}</h3>
-                                    <p className="text-xs text-white/80">{image.price.toLocaleString("vi-VN")} ₫</p>
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={`grid-${animationKey}`}
+                        className="grid grid-cols-2 gap-4 md:grid-cols-3"
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                    >
+                        {currentImages.map((image) => (
+                            <motion.div
+                                key={image.id}
+                                layoutId={`image-${image.id}-${animationKey}`}
+                                className="group relative aspect-square cursor-pointer overflow-hidden rounded-lg"
+                                onClick={() => setSelectedImage(image)}
+                                variants={itemVariants}
+                            >
+                                <img src={image.url || "/placeholder.svg"} alt={image.title} className="h-full w-full object-cover" />
+                                <div className="absolute inset-0 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
+                                    <div className="flex h-full flex-col items-center justify-center gap-2 p-4 text-center">
+                                        <h3 className="text-sm font-medium text-white">{image.title}</h3>
+                                        <p className="text-xs text-white/80">{image.price.toLocaleString("vi-VN")} ₫</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                </AnimatePresence>
 
                 {/* Shadcn Pagination */}
                 {totalPages > 1 && (
@@ -227,10 +282,11 @@ export function PhotographerProfile() {
                     </Pagination>
                 )}
             </div>
+
             {/* Image Modal */}
             {selectedImage && (
                 <motion.div
-                    layoutId={`image-${selectedImage.id}`}
+                    layoutId={`image-${selectedImage.id}-${animationKey}`}
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
                     onClick={() => setSelectedImage(null)}
                 >
@@ -255,9 +311,6 @@ export function PhotographerProfile() {
                             </div>
                             <div className="mt-4 flex items-center justify-between">
                                 <span className="text-lg font-medium text-white">{selectedImage.price.toLocaleString("vi-VN")} ₫</span>
-                                <button className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700">
-                                    Add to Cart
-                                </button>
                             </div>
                         </div>
                     </div>
