@@ -18,9 +18,10 @@ import { ProtectedRoute } from "./components/security/ProtectedRoute"
 import UserPage from "./pages/UserPage"
 import PhotographerPage from "./pages/PhotographerPage"
 import { ToastProvider } from "./components/custom/sonner-provider"
+import AdminPage from "./pages/AdminPage"
 
 // Define valid routes
-const validRoutes = ["/", "/login", "/register", "/art-gallery", "/user-profile", "/photographer-profile", "/not-found"]
+const validRoutes = ["/", "/login", "/register", "/art-gallery", "/user-profile", "/photographer-profile", "/not-found", "/admin"]
 
 const AppContent: React.FC = () => {
 	const location = useLocation()
@@ -94,6 +95,17 @@ const AppContent: React.FC = () => {
 							}
 						/>
 
+						<Route
+							path="/admin"
+							element={
+								<ProtectedRoute requireAuth={true} requirePhotographer={false} requireAdmin={true}>
+									<PageTransition>
+										<AdminPage />
+									</PageTransition>
+								</ProtectedRoute>
+							}
+						/>
+
 						{/* 404 Page */}
 						<Route
 							path="*"
@@ -118,7 +130,7 @@ const App: React.FC = () => {
 				<CartProvider>
 					<AppContent />
 					<CartDrawer />
-					<ToastProvider/>
+					<ToastProvider />
 				</CartProvider>
 			</AuthProvider>
 		</Router>
