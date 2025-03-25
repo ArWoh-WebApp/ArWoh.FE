@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosInstance from "./axiosInstance"
-import { ApiResponse } from "./apiResponse"
+import type { ApiResponse } from "./apiResponse"
 
 const GET_ARTWORK = "/images"
 
@@ -22,10 +22,9 @@ export interface ArtworkResponse {
   location: string
   fileName: string
   url: string
-  src?: string // Optional since it will be mapped from url
-  user?: User // Optional since it will be created from photographerId
+  src?: string
+  user?: User
 }
-
 
 export const artworkService = {
   getArtworks: async () => {
