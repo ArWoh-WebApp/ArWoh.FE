@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosInstance from "./axiosInstance"
+import { ApiResponse } from "./apiResponse"
 
 const GET_ARTWORK = "/images"
 
@@ -25,11 +26,6 @@ export interface ArtworkResponse {
   user?: User // Optional since it will be created from photographerId
 }
 
-export interface ApiResponse<T> {
-  isSuccess: boolean
-  message: string
-  data: T
-}
 
 export const artworkService = {
   getArtworks: async () => {

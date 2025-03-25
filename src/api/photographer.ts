@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosInstance from "./axiosInstance"
-import { UserService } from "./user" // Import the existing user service
+import { UserService } from "./user"
+import { ApiResponse } from "./apiResponse"
 
 export interface PhotographerImage {
     id: number
@@ -16,11 +17,6 @@ export interface PhotographerImage {
     url: string
 }
 
-export interface ApiResponse<T> {
-    isSuccess: boolean
-    message: string
-    data: T
-}
 
 export const photographerService = {
     // Reuse 2 function bên user
