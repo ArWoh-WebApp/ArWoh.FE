@@ -40,6 +40,21 @@ export interface UploadImageRequest {
     file: File
 }
 
+// Add these new interfaces for the revenue data
+export interface ImageSale {
+    imageId: number
+    imageTitle: string
+    imageUrl: string
+    salesCount: number
+    totalAmount: number
+}
+
+export interface RevenueData {
+    totalRevenue: number
+    totalImagesSold: number
+    imageSales: ImageSale[]
+}
+
 export const photographerService = {
     // Reuse 2 function bên user
     getPhotographerProfile: UserService.getUserProfile,
@@ -140,6 +155,24 @@ export const photographerService = {
                 isSuccess: false,
                 message: error.message || "Failed to upload image",
                 data: null as any,
+            }
+        }
+    },
+
+    // Add the getPhotographerRevenue function to the photographerService object
+    getPhotographerRevenue: async (): Promise<ApiResponse<RevenueData>> => {
+        try {
+            const response = await axiosInstance.get<ApiResponse<RevenueData>>("/photographers/revenue/me")
+            return response.data
+        } catch (error: any) {
+            return {
+                isSuccess: false,
+                message: error.message || "Failed to fetch revenue data",
+                data: {
+                    totalRevenue: 0,
+                    totalImagesSold: 0,
+                    imageSales: [],
+                },
             }
         }
     },
