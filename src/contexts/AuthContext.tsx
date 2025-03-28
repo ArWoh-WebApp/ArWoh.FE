@@ -93,7 +93,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setIsAuthenticated(true)
                     console.log("Login successful, role:", userResponse.data.role)
                 }
-                toast.success("Login successful")
                 return true
             }
             toast.error(response.message || "Login failed")
