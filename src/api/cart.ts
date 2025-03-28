@@ -1,4 +1,5 @@
 import axiosInstance from "./axiosInstance"
+import { ApiResponse } from "./apiResponse"
 
 // Cart Types
 export interface CartItem {
@@ -25,11 +26,6 @@ export interface UpdateCartItemDto {
     quantity: number
 }
 
-export interface ApiResponse<T> {
-    isSuccess: boolean
-    message: string
-    data: T
-}
 
 // Cart Service
 export const cartService = {

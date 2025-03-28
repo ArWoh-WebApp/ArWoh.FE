@@ -20,7 +20,15 @@ import PhotographerPage from "./pages/PhotographerPage"
 import { ToastProvider } from "./components/custom/sonner-provider"
 
 // Define valid routes
-const validRoutes = ["/", "/login", "/register", "/art-gallery", "/user-profile", "/photographer-profile", "/not-found"]
+const validRoutes = [
+	"/",
+	"/login",
+	"/register",
+	"/art-gallery",
+	"/user-profile",
+	"/photographer-profile",
+	"/not-found"
+]
 
 const AppContent: React.FC = () => {
 	const location = useLocation()
@@ -118,7 +126,7 @@ const App: React.FC = () => {
 				<CartProvider>
 					<AppContent />
 					<CartDrawer />
-					<ToastProvider/>
+					<ToastProvider />
 				</CartProvider>
 			</AuthProvider>
 		</Router>

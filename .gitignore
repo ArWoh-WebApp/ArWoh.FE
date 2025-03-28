@@ -1,39 +1,105 @@
-# Created by https://www.toptal.com/developers/gitignore/api/react,visualstudiocode
-# Edit at https://www.toptal.com/developers/gitignore?templates=react,visualstudiocode
-
-### react ###
-.DS_*
-*.log
-logs
-**/*.backup.*
-**/*.back.*
-
+# Dependencies
 node_modules
-bower_components
+.pnpm-store/
+.npm
+package-lock.json
 
-*.sublime*
+# pnpm specific
+pnpm-debug.log*
 
-psd
-thumb
-sketch
+# Build outputs
+/dist
+/dist-ssr
+/build
+/out
+/.next/
+/storybook-static
 
-### VisualStudioCode ###
+# Testing
+/coverage
+/.nyc_output
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Editor directories and files
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
-
-# Local History for Visual Studio Code
-.history/
-
-# Built Visual Studio Code Extensions
-*.vsix
-
-### VisualStudioCode Patch ###
-# Ignore all local history of files
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.sublime-*
+.project
+.classpath
+.c9/
+*.launch
+.settings/
 .history
 .ionide
 
-# End of https://www.toptal.com/developers/gitignore/api/react,visualstudiocode
+# System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.directory
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Cache and temp folders
+.cache/
+.temp/
+.tmp/
+.eslintcache
+.stylelintcache
+.parcel-cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+.rpt2_cache/
+.sourcemaps/
+*.tsbuildinfo
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Misc
+.DS_*
+*.pem
+.node_repl_history
+*~
+.fusebox/
+.dynamodb/
+.tern-port
+.yarn-integrity
+bower_components
+jspm_packages/
+web_modules/
+psd
+thumb
+sketch
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts

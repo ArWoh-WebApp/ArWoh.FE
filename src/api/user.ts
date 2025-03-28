@@ -1,17 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-namespace */
 import axiosInstance from "./axiosInstance"
+import { ApiResponse } from "./apiResponse"
 
 const PROFILE_API = "/users/me/profile"
 const UPDATE_AVATAR_API = "/users/me/avatar"
 const USER_TRANSACTIONS_API = "/images/bought-by-user"
 
 export namespace UserService {
-    export interface ApiResponse<T> {
-        isSuccess: boolean
-        message: string
-        data: T
-    }
+
 
     export interface User {
         id: number
