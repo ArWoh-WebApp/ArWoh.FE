@@ -64,7 +64,7 @@ export function PhotographerProfile() {
 
     // Reset animation when tab changes
     useEffect(() => {
-        // This will trigger a re-render and reset animations
+        // Trigger a re-render and reset animations
         setAnimationKey((prev) => prev + 1)
     }, [])
 
