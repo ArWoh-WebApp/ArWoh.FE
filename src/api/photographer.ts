@@ -9,7 +9,7 @@ export interface PhotographerImage {
     title: string
     description: string
     price: number
-    storyOfArt: string | null
+    storyOfArt: string | null // Can contain HTML content
     orientation: string | null
     tags: string[]
     location: string | null
@@ -21,7 +21,7 @@ export interface UpdateImageRequest {
     title: string
     description: string
     price: number
-    storyOfArt: string
+    storyOfArt: string // Can contain HTML content
     orientation: string
     tags: string[]
     location: string
@@ -36,7 +36,7 @@ export interface UploadImageRequest {
     location: string
     orientation: "Portrait" | "Landscape"
     tags: string[]
-    storyOfArt: string
+    storyOfArt: string // Can contain HTML content
     file: File
 }
 
@@ -130,7 +130,7 @@ export const photographerService = {
             formData.append("price", imageData.price.toString())
             formData.append("location", imageData.location)
             formData.append("orientation", imageData.orientation)
-            formData.append("storyOfArt", imageData.storyOfArt)
+            formData.append("storyOfArt", imageData.storyOfArt) // This will now contain HTML content
 
             // Add tags as separate items
             if (imageData.tags && imageData.tags.length > 0) {

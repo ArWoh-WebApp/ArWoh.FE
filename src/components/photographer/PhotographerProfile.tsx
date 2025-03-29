@@ -24,6 +24,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { RichTextEditor } from "@/components/richText/RichTextEditor"
+import { RichTextContent } from "@/components/richText/RichTextContent"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export function PhotographerProfile() {
     const [profile, setProfile] = useState<UserService.User | null>(null)
@@ -71,13 +74,13 @@ export function PhotographerProfile() {
     const fetchData = async () => {
         try {
             setIsLoading(true)
-            
+
             // Get the profile
             const profileRes = await photographerService.getPhotographerProfile()
-            
+
             if (profileRes.isSuccess) {
                 setProfile(profileRes.data)
-                
+
                 // Then use the profile ID to fetch images
                 const imagesRes = await photographerService.getPhotographerImages(profileRes.data.id)
                 if (imagesRes.isSuccess) {
@@ -284,6 +287,14 @@ export function PhotographerProfile() {
         setFormData({
             ...formData,
             [name]: value,
+        })
+    }
+
+    // Handler for rich text editor changes
+    const handleRichTextChange = (html: string) => {
+        setFormData({
+            ...formData,
+            storyOfArt: html,
         })
     }
 
@@ -641,7 +652,7 @@ export function PhotographerProfile() {
                                             {selectedImage.storyOfArt && (
                                                 <div>
                                                     <h4 className="text-sm font-medium text-white/60">Story</h4>
-                                                    <p className="text-sm text-white/80">{selectedImage.storyOfArt}</p>
+                                                    <RichTextContent html={selectedImage.storyOfArt} className="text-sm text-white/80" />
                                                 </div>
                                             )}
 
@@ -709,115 +720,114 @@ export function PhotographerProfile() {
 
             {/* Edit Image Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                <DialogContent className="sm:max-w-xl bg-black/95 border-white/10">
+                <DialogContent className="sm:max-w-xl bg-black/95 border-white/10 max-h-[90vh]">
                     <DialogHeader>
                         <DialogTitle className="text-white">Edit Image</DialogTitle>
                         <DialogDescription className="text-white/60">Update the details of your image.</DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid gap-6 py-4">
-                        <div className="grid grid-cols-2 gap-4">
+                    <ScrollArea className="max-h-[60vh] pr-4">
+                        <div className="grid gap-6 py-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="title" className="text-white/80">
+                                        Title
+                                    </Label>
+                                    <Input
+                                        id="title"
+                                        name="title"
+                                        value={formData.title}
+                                        onChange={handleInputChange}
+                                        className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="price" className="text-white/80">
+                                        Price (₫)
+                                    </Label>
+                                    <Input
+                                        id="price"
+                                        name="price"
+                                        type="number"
+                                        value={formData.price}
+                                        onChange={handleInputChange}
+                                        className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
+                                    />
+                                </div>
+                            </div>
+
                             <div className="space-y-2">
-                                <Label htmlFor="title" className="text-white/80">
-                                    Title
+                                <Label htmlFor="description" className="text-white/80">
+                                    Description
                                 </Label>
-                                <Input
-                                    id="title"
-                                    name="title"
-                                    value={formData.title}
+                                <Textarea
+                                    id="description"
+                                    name="description"
+                                    value={formData.description}
                                     onChange={handleInputChange}
+                                    rows={3}
                                     className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
                                 />
                             </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="location" className="text-white/80">
+                                        Location
+                                    </Label>
+                                    <Input
+                                        id="location"
+                                        name="location"
+                                        value={formData.location}
+                                        onChange={handleInputChange}
+                                        className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="orientation" className="text-white/80">
+                                        Orientation
+                                    </Label>
+                                    <select
+                                        id="orientation"
+                                        name="orientation"
+                                        value={formData.orientation}
+                                        onChange={handleInputChange}
+                                        className="w-full rounded-md border border-white/10 bg-black/50 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    >
+                                        <option value="Portrait">Portrait</option>
+                                        <option value="Landscape">Landscape</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <div className="space-y-2">
-                                <Label htmlFor="price" className="text-white/80">
-                                    Price (₫)
+                                <Label htmlFor="tags" className="text-white/80">
+                                    Tags (comma separated)
                                 </Label>
                                 <Input
-                                    id="price"
-                                    name="price"
-                                    type="number"
-                                    value={formData.price}
+                                    id="tags"
+                                    name="tags"
+                                    value={formData.tags}
                                     onChange={handleInputChange}
                                     className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
+                                    placeholder="nature, landscape, mountains"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="storyOfArt" className="text-white/80">
+                                    Story
+                                </Label>
+                                <RichTextEditor
+                                    value={formData.storyOfArt}
+                                    onChange={handleRichTextChange}
+                                    placeholder="Tell the story behind this image"
                                 />
                             </div>
                         </div>
+                    </ScrollArea>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="description" className="text-white/80">
-                                Description
-                            </Label>
-                            <Textarea
-                                id="description"
-                                name="description"
-                                value={formData.description}
-                                onChange={handleInputChange}
-                                rows={3}
-                                className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="location" className="text-white/80">
-                                    Location
-                                </Label>
-                                <Input
-                                    id="location"
-                                    name="location"
-                                    value={formData.location}
-                                    onChange={handleInputChange}
-                                    className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="orientation" className="text-white/80">
-                                    Orientation
-                                </Label>
-                                <select
-                                    id="orientation"
-                                    name="orientation"
-                                    value={formData.orientation}
-                                    onChange={handleInputChange}
-                                    className="w-full rounded-md border border-white/10 bg-black/50 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                >
-                                    <option value="Portrait">Portrait</option>
-                                    <option value="Landscape">Landscape</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="tags" className="text-white/80">
-                                Tags (comma separated)
-                            </Label>
-                            <Input
-                                id="tags"
-                                name="tags"
-                                value={formData.tags}
-                                onChange={handleInputChange}
-                                className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
-                                placeholder="nature, landscape, mountains"
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="storyOfArt" className="text-white/80">
-                                Story
-                            </Label>
-                            <Textarea
-                                id="storyOfArt"
-                                name="storyOfArt"
-                                value={formData.storyOfArt}
-                                onChange={handleInputChange}
-                                rows={3}
-                                className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex justify-end gap-4">
+                    <div className="flex justify-end gap-4 mt-6">
                         <Button
                             variant="outline"
                             onClick={() => setIsEditDialogOpen(false)}
@@ -840,11 +850,11 @@ export function PhotographerProfile() {
                         <DialogDescription className="text-white/60">Add a new image to your portfolio.</DialogDescription>
                     </DialogHeader>
 
-                    <div className="flex flex-col md:flex-row gap-6 mt-4 max-h-[70vh] overflow-auto pr-2">
+                    <div className="flex flex-col md:flex-row gap-6 mt-4 h-[70vh]">
                         {/* Left side - File Upload Area */}
-                        <div className="md:w-1/3 flex-shrink-0">
+                        <div className="md:w-2/5 flex-shrink-0 h-full">
                             <div
-                                className="relative border-2 border-dashed border-purple-500/30 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:border-purple-500/50 transition-colors h-full min-h-[300px]"
+                                className={`relative border-2 border-dashed ${formData.file ? 'border-purple-500' : 'border-purple-500/30'} rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-purple-500/50 transition-colors h-full`}
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <input
@@ -859,7 +869,7 @@ export function PhotographerProfile() {
 
                                 {formData.file ? (
                                     <div className="w-full flex flex-col items-center">
-                                        <div className="relative w-full h-48 mb-4 overflow-hidden rounded-lg border border-white/20">
+                                        <div className="relative w-full h-[400px] mb-4 overflow-hidden rounded-lg border border-white/20">
                                             <img
                                                 src={URL.createObjectURL(formData.file) || "/placeholder.svg"}
                                                 alt="Preview"
@@ -892,110 +902,110 @@ export function PhotographerProfile() {
                         </div>
 
                         {/* Right side - Form Fields */}
-                        <div className="md:w-2/3 space-y-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="upload-title" className="text-white/80">
-                                    Title
-                                </Label>
-                                <Input
-                                    id="upload-title"
-                                    name="title"
-                                    value={formData.title}
-                                    onChange={handleInputChange}
-                                    className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
-                                    placeholder="Enter title"
-                                />
-                            </div>
+                        <div className="md:w-3/5 h-full">
+                            <ScrollArea className="h-full pr-2">
+                                <div className="space-y-6 pb-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="upload-title" className="text-white/80">
+                                            Title
+                                        </Label>
+                                        <Input
+                                            id="upload-title"
+                                            name="title"
+                                            value={formData.title}
+                                            onChange={handleInputChange}
+                                            className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
+                                            placeholder="Enter title"
+                                        />
+                                    </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="upload-price" className="text-white/80">
-                                    Price (₫)
-                                </Label>
-                                <Input
-                                    id="upload-price"
-                                    name="price"
-                                    type="number"
-                                    value={formData.price}
-                                    onChange={handleInputChange}
-                                    className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
-                                    placeholder="Enter price"
-                                />
-                            </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="upload-price" className="text-white/80">
+                                            Price (₫)
+                                        </Label>
+                                        <Input
+                                            id="upload-price"
+                                            name="price"
+                                            type="number"
+                                            value={formData.price}
+                                            onChange={handleInputChange}
+                                            className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
+                                            placeholder="Enter price"
+                                        />
+                                    </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="upload-description" className="text-white/80">
-                                    Description
-                                </Label>
-                                <Textarea
-                                    id="upload-description"
-                                    name="description"
-                                    value={formData.description}
-                                    onChange={handleInputChange}
-                                    rows={3}
-                                    className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
-                                    placeholder="Describe your image"
-                                />
-                            </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="upload-description" className="text-white/80">
+                                            Description
+                                        </Label>
+                                        <Textarea
+                                            id="upload-description"
+                                            name="description"
+                                            value={formData.description}
+                                            onChange={handleInputChange}
+                                            rows={3}
+                                            className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
+                                            placeholder="Describe your image"
+                                        />
+                                    </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="upload-location" className="text-white/80">
-                                        Location
-                                    </Label>
-                                    <Input
-                                        id="upload-location"
-                                        name="location"
-                                        value={formData.location}
-                                        onChange={handleInputChange}
-                                        className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
-                                        placeholder="Where was it taken?"
-                                    />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="upload-location" className="text-white/80">
+                                                Location
+                                            </Label>
+                                            <Input
+                                                id="upload-location"
+                                                name="location"
+                                                value={formData.location}
+                                                onChange={handleInputChange}
+                                                className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
+                                                placeholder="Where was it taken?"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="upload-orientation" className="text-white/80">
+                                                Orientation
+                                            </Label>
+                                            <select
+                                                id="upload-orientation"
+                                                name="orientation"
+                                                value={formData.orientation}
+                                                onChange={handleInputChange}
+                                                className="w-full rounded-md border border-white/10 bg-black/50 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                            >
+                                                <option value="Portrait">Portrait</option>
+                                                <option value="Landscape">Landscape</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="upload-tags" className="text-white/80">
+                                            Tags (comma separated)
+                                        </Label>
+                                        <Input
+                                            id="upload-tags"
+                                            name="tags"
+                                            value={formData.tags}
+                                            onChange={handleInputChange}
+                                            className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
+                                            placeholder="nature, landscape, mountains"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="upload-storyOfArt" className="text-white/80">
+                                            Story
+                                        </Label>
+                                        <RichTextEditor
+                                            value={formData.storyOfArt}
+                                            onChange={handleRichTextChange}
+                                            placeholder="Tell the story behind this image"
+                                        />
+                                    </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="upload-orientation" className="text-white/80">
-                                        Orientation
-                                    </Label>
-                                    <select
-                                        id="upload-orientation"
-                                        name="orientation"
-                                        value={formData.orientation}
-                                        onChange={handleInputChange}
-                                        className="w-full rounded-md border border-white/10 bg-black/50 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                    >
-                                        <option value="Portrait">Portrait</option>
-                                        <option value="Landscape">Landscape</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="upload-tags" className="text-white/80">
-                                    Tags (comma separated)
-                                </Label>
-                                <Input
-                                    id="upload-tags"
-                                    name="tags"
-                                    value={formData.tags}
-                                    onChange={handleInputChange}
-                                    className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
-                                    placeholder="nature, landscape, mountains"
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="upload-storyOfArt" className="text-white/80">
-                                    Story
-                                </Label>
-                                <Textarea
-                                    id="upload-storyOfArt"
-                                    name="storyOfArt"
-                                    value={formData.storyOfArt}
-                                    onChange={handleInputChange}
-                                    rows={3}
-                                    className="bg-white/5 border-white/10 text-white focus-visible:ring-purple-500"
-                                    placeholder="Tell the story behind this image"
-                                />
-                            </div>
+                            </ScrollArea>
                         </div>
                     </div>
 
