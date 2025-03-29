@@ -72,7 +72,7 @@ export function PhotographerProfile() {
         try {
             setIsLoading(true)
             
-            // First get the profile
+            // Get the profile
             const profileRes = await photographerService.getPhotographerProfile()
             
             if (profileRes.isSuccess) {

@@ -18,6 +18,7 @@ import { ProtectedRoute } from "./components/security/ProtectedRoute"
 import UserPage from "./pages/UserPage"
 import PhotographerPage from "./pages/PhotographerPage"
 import { ToastProvider } from "./components/custom/sonner-provider"
+import PortfolioPage from "./pages/PortfolioPage"
 
 // Define valid routes
 const validRoutes = [
@@ -27,6 +28,7 @@ const validRoutes = [
 	"/art-gallery",
 	"/user-profile",
 	"/photographer-profile",
+	"/portfolio",
 	"/not-found"
 ]
 
@@ -76,6 +78,14 @@ const AppContent: React.FC = () => {
 							element={
 								<PageTransition>
 									<ArtworkList />
+								</PageTransition>
+							}
+						/>
+						<Route
+							path="/portfolio"
+							element={
+								<PageTransition>
+									<PortfolioPage />
 								</PageTransition>
 							}
 						/>
