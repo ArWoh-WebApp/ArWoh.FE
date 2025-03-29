@@ -71,16 +71,18 @@ export function PhotographerProfile() {
     const fetchData = async () => {
         try {
             setIsLoading(true)
-            const [profileRes, imagesRes] = await Promise.all([
-                photographerService.getPhotographerProfile(),
-                photographerService.getPhotographerImages(4), // Hardcoded ID for now
-            ])
-
+            
+            // First get the profile
+            const profileRes = await photographerService.getPhotographerProfile()
+            
             if (profileRes.isSuccess) {
                 setProfile(profileRes.data)
-            }
-            if (imagesRes.isSuccess) {
-                setImages(imagesRes.data)
+                
+                // Then use the profile ID to fetch images
+                const imagesRes = await photographerService.getPhotographerImages(profileRes.data.id)
+                if (imagesRes.isSuccess) {
+                    setImages(imagesRes.data)
+                }
             }
         } catch (error) {
             console.error("Failed to fetch photographer data:", error)
