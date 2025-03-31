@@ -21,6 +21,7 @@ import { ToastProvider } from "./components/custom/sonner-provider"
 import PortfolioPage from "./pages/PortfolioPage"
 import PhotographerPublicPage from "./pages/PublicPhotographerPage"
 import { useEffect } from "react"
+import StoryOfArtPage from "./pages/StoryOfArtPage"
 
 // Define route patterns
 const routePatterns = [
@@ -32,6 +33,7 @@ const routePatterns = [
 	"/photographer-profile",
 	"/photographer/:id", // Dynamic route pattern
 	"/portfolio",
+	"/story-of-art",
 	"/not-found",
 ]
 
@@ -119,6 +121,14 @@ const AppContent: React.FC = () => {
 							element={
 								<PageTransition>
 									<PortfolioPage />
+								</PageTransition>
+							}
+						/>
+						<Route
+							path="/story-of-art"
+							element={
+								<PageTransition>
+									<StoryOfArtPage />
 								</PageTransition>
 							}
 						/>
