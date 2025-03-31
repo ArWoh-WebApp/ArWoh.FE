@@ -19,24 +19,57 @@ import UserPage from "./pages/UserPage"
 import PhotographerPage from "./pages/PhotographerPage"
 import { ToastProvider } from "./components/custom/sonner-provider"
 import PortfolioPage from "./pages/PortfolioPage"
+import PhotographerPublicPage from "./pages/PublicPhotographerPage"
+import { useEffect } from "react"
 
-// Define valid routes
-const validRoutes = [
+// Define route patterns
+const routePatterns = [
 	"/",
 	"/login",
 	"/register",
 	"/art-gallery",
 	"/user-profile",
 	"/photographer-profile",
+	"/photographer/:id", // Dynamic route pattern
 	"/portfolio",
-	"/not-found"
+	"/not-found",
 ]
+
+// Function to check if a path matches any of the route patterns
+const isPathMatchingPattern = (path: string, patterns: string[]): boolean => {
+	// Direct match
+	if (patterns.includes(path)) return true
+
+	// Check for pattern matches (like /photographer/:id)
+	return patterns.some((pattern) => {
+		if (!pattern.includes(":")) return false
+
+		const patternParts = pattern.split("/")
+		const pathParts = path.split("/")
+
+		if (patternParts.length !== pathParts.length) return false
+
+		return patternParts.every((part, index) => {
+			// If it's a parameter part (starts with :), it matches any value
+			if (part.startsWith(":")) return true
+			// Otherwise, it should match exactly
+			return part === pathParts[index]
+		})
+	})
+}
 
 const AppContent: React.FC = () => {
 	const location = useLocation()
-	const isValidRoute = validRoutes.includes(location.pathname)
+	const isValidRoute = isPathMatchingPattern(location.pathname, routePatterns)
 	const isAuthPage = location.pathname === "/login" || location.pathname === "/register"
 	const showHeaderFooter = isValidRoute && !isAuthPage
+
+	useEffect(() => {
+		document.body.style.overflow = "auto"
+		return () => {
+			document.body.style.overflow = "auto"
+		}
+	}, [location.pathname])
 
 	return (
 		<div className="flex min-h-screen flex-col">
@@ -86,6 +119,14 @@ const AppContent: React.FC = () => {
 							element={
 								<PageTransition>
 									<PortfolioPage />
+								</PageTransition>
+							}
+						/>
+						<Route
+							path="/photographer/:id"
+							element={
+								<PageTransition>
+									<PhotographerPublicPage />
 								</PageTransition>
 							}
 						/>
