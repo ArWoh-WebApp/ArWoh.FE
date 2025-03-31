@@ -13,7 +13,7 @@ interface RichTextEditorProps {
     placeholder?: string
 }
 
-export function RichTextEditor({ value, onChange, placeholder = "Write something..." }: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     const editor = useEditor({
         extensions: [
             StarterKit,

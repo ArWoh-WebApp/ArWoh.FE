@@ -9,7 +9,7 @@ export interface PhotographerImage {
     title: string
     description: string
     price: number
-    storyOfArt: string | null // Can contain HTML content
+    storyOfArt: string | null
     orientation: string | null
     tags: string[]
     location: string | null
@@ -21,7 +21,7 @@ export interface UpdateImageRequest {
     title: string
     description: string
     price: number
-    storyOfArt: string // Can contain HTML content
+    storyOfArt: string 
     orientation: string
     tags: string[]
     location: string
@@ -36,11 +36,11 @@ export interface UploadImageRequest {
     location: string
     orientation: "Portrait" | "Landscape"
     tags: string[]
-    storyOfArt: string // Can contain HTML content
+    storyOfArt: string 
     file: File
 }
 
-// Add these new interfaces for the revenue data
+// interfaces for the revenue data
 export interface ImageSale {
     imageId: number
     imageTitle: string
@@ -55,12 +55,38 @@ export interface RevenueData {
     imageSales: ImageSale[]
 }
 
+// Add interface for photographer profile
+export interface PhotographerProfile {
+    userId: number
+    username: string
+    email: string
+    role: string
+    bio: string | null
+    profilePictureUrl: string | null
+}
+
 export const photographerService = {
     // Reuse 2 function bên user
     getPhotographerProfile: UserService.getUserProfile,
     updateAvatar: UserService.updateAvatar,
 
-    // Get photographer images
+    // New function to get photographer profile by ID
+    getPhotographerProfileById: async (photographerId: number): Promise<ApiResponse<PhotographerProfile>> => {
+        try {
+            const response = await axiosInstance.get<ApiResponse<PhotographerProfile>>(
+                `/photographers/${photographerId}/profile`,
+            )
+            return response.data
+        } catch (error: any) {
+            return {
+                isSuccess: false,
+                message: error.message || "Failed to fetch photographer profile",
+                data: null as any,
+            }
+        }
+    },
+
+    // Get photographer images by Id
     getPhotographerImages: async (photographerId: number): Promise<ApiResponse<PhotographerImage[]>> => {
         try {
             const response = await axiosInstance.get<ApiResponse<PhotographerImage[]>>(

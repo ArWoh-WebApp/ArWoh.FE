@@ -24,9 +24,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { RichTextEditor } from "@/components/richText/RichTextEditor"
 import { RichTextContent } from "@/components/richText/RichTextContent"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 export function PhotographerProfile() {
     const [profile, setProfile] = useState<UserService.User | null>(null)
@@ -67,25 +67,23 @@ export function PhotographerProfile() {
 
     // Reset animation when tab changes
     useEffect(() => {
-        // Trigger a re-render and reset animations
+        // This will trigger a re-render and reset animations
         setAnimationKey((prev) => prev + 1)
     }, [])
 
     const fetchData = async () => {
         try {
             setIsLoading(true)
-
-            // Get the profile
-            const profileRes = await photographerService.getPhotographerProfile()
+            const [profileRes, imagesRes] = await Promise.all([
+                photographerService.getPhotographerProfile(),
+                photographerService.getPhotographerImages(4), // Hardcoded ID for now
+            ])
 
             if (profileRes.isSuccess) {
                 setProfile(profileRes.data)
-
-                // Then use the profile ID to fetch images
-                const imagesRes = await photographerService.getPhotographerImages(profileRes.data.id)
-                if (imagesRes.isSuccess) {
-                    setImages(imagesRes.data)
-                }
+            }
+            if (imagesRes.isSuccess) {
+                setImages(imagesRes.data)
             }
         } catch (error) {
             console.error("Failed to fetch photographer data:", error)
@@ -290,11 +288,10 @@ export function PhotographerProfile() {
         })
     }
 
-    // Handler for rich text editor changes
-    const handleRichTextChange = (html: string) => {
+    const handleRichTextChange = (value: string) => {
         setFormData({
             ...formData,
-            storyOfArt: html,
+            storyOfArt: value,
         })
     }
 
@@ -652,7 +649,10 @@ export function PhotographerProfile() {
                                             {selectedImage.storyOfArt && (
                                                 <div>
                                                     <h4 className="text-sm font-medium text-white/60">Story</h4>
-                                                    <RichTextContent html={selectedImage.storyOfArt} className="text-sm text-white/80" />
+                                                    <RichTextContent
+                                                        html={selectedImage.storyOfArt}
+                                                        className="text-sm text-white/80 mt-2 max-h-[200px] overflow-y-auto pr-2"
+                                                    />
                                                 </div>
                                             )}
 
@@ -720,13 +720,15 @@ export function PhotographerProfile() {
 
             {/* Edit Image Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                <DialogContent className="sm:max-w-xl bg-black/95 border-white/10 max-h-[90vh]">
+                <DialogContent className="sm:max-w-4xl bg-black/95 border-white/10 max-h-[90vh] overflow-hidden">
                     <DialogHeader>
-                        <DialogTitle className="text-white">Edit Image</DialogTitle>
-                        <DialogDescription className="text-white/60">Update the details of your image.</DialogDescription>
+                        <DialogTitle className="text-xl text-white">Edit Image</DialogTitle>
+                        <DialogDescription className="text-white/60">
+                            Update the details of your image. Rich text formatting is available for the Story field.
+                        </DialogDescription>
                     </DialogHeader>
 
-                    <ScrollArea className="max-h-[60vh] pr-4">
+                    <ScrollArea className="max-h-[65vh] pr-4">
                         <div className="grid gap-6 py-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
@@ -815,8 +817,9 @@ export function PhotographerProfile() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="storyOfArt" className="text-white/80">
+                                <Label htmlFor="storyOfArt" className="text-white/80 flex items-center gap-2">
                                     Story
+                                    <span className="text-xs text-purple-400">(Rich text formatting available)</span>
                                 </Label>
                                 <RichTextEditor
                                     value={formData.storyOfArt}
@@ -844,17 +847,19 @@ export function PhotographerProfile() {
 
             {/* Upload Image Dialog */}
             <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
-                <DialogContent className="sm:max-w-5xl bg-black/95 border-white/10 max-h-[90vh] overflow-hidden">
+                <DialogContent className="sm:max-w-6xl bg-black/95 border-white/10 max-h-[90vh] overflow-hidden">
                     <DialogHeader>
-                        <DialogTitle className="text-white">Upload New Image</DialogTitle>
-                        <DialogDescription className="text-white/60">Add a new image to your portfolio.</DialogDescription>
+                        <DialogTitle className="text-xl text-white">Upload New Image</DialogTitle>
+                        <DialogDescription className="text-white/60">
+                            Add a new image to your portfolio. Rich text formatting is available for the Story field.
+                        </DialogDescription>
                     </DialogHeader>
 
                     <div className="flex flex-col md:flex-row gap-6 mt-4 h-[70vh]">
                         {/* Left side - File Upload Area */}
                         <div className="md:w-2/5 flex-shrink-0 h-full">
                             <div
-                                className={`relative border-2 border-dashed ${formData.file ? 'border-purple-500' : 'border-purple-500/30'} rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-purple-500/50 transition-colors h-full`}
+                                className={`relative border-2 border-dashed ${formData.file ? "border-purple-500" : "border-purple-500/30"} rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-purple-500/50 transition-colors h-full`}
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <input
@@ -891,11 +896,11 @@ export function PhotographerProfile() {
                                     </div>
                                 ) : (
                                     <>
-                                        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                                            <Plus className="h-8 w-8 text-gray-400" />
+                                        <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                                            <Plus className="h-12 w-12 text-gray-400" />
                                         </div>
-                                        <p className="text-gray-400 text-sm font-medium">Click to upload image</p>
-                                        <p className="text-white/40 text-xs mt-2 text-center">PNG, JPG or WEBP (max. 10MB)</p>
+                                        <p className="text-gray-400 text-base font-medium">Click to upload image</p>
+                                        <p className="text-white/40 text-sm mt-2 text-center">PNG, JPG or WEBP (max. 10MB)</p>
                                     </>
                                 )}
                             </div>
@@ -903,7 +908,7 @@ export function PhotographerProfile() {
 
                         {/* Right side - Form Fields */}
                         <div className="md:w-3/5 h-full">
-                            <ScrollArea className="h-full pr-2">
+                            <ScrollArea className="h-full pr-4">
                                 <div className="space-y-6 pb-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="upload-title" className="text-white/80">
@@ -995,8 +1000,9 @@ export function PhotographerProfile() {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="upload-storyOfArt" className="text-white/80">
+                                        <Label htmlFor="upload-storyOfArt" className="text-white/80 flex items-center gap-2">
                                             Story
+                                            <span className="text-xs text-purple-400">(Rich text formatting available)</span>
                                         </Label>
                                         <RichTextEditor
                                             value={formData.storyOfArt}
