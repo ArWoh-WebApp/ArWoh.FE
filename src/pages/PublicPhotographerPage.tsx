@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams } from "react-router-dom"
-import { PublicPhotographerProfile } from "@/components/publicPhotographerProfile"
+import { PublicPhotographerProfile } from "@/components/PublicPhotographerProfile"
 
 export default function PhotographerPublicPage() {
     const { id } = useParams<{ id: string }>()

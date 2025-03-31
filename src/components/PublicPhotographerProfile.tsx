@@ -31,7 +31,7 @@ export function PublicPhotographerProfile({ photographerId }: PublicPhotographer
     const [isLoading, setIsLoading] = useState(true)
     const [isImageLoading, setIsImageLoading] = useState(false)
     const [selectedImage, setSelectedImage] = useState<PhotographerImage | null>(null)
-    const [animationKey, setAnimationKey] = useState(0) // Key for animation reset
+    const [animationKey, setAnimationKey] = useState(0)
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
     const { addItem, isLoading: isCartLoading } = useCart()
     const [quantity, setQuantity] = useState(1)
