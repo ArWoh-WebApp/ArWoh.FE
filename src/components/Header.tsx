@@ -82,8 +82,8 @@ export default function Header() {
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent>
-								<DropdownMenuItem>Portfolio</DropdownMenuItem>
-								<DropdownMenuItem>Story of Art</DropdownMenuItem>
+								<DropdownMenuItem onClick={() => navigate("/portfolio")}>Portfolio</DropdownMenuItem>
+								<DropdownMenuItem onClick={() => navigate("/story-of-art")}>Story of Art</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
 

@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Share2, X, ShoppingCart, Minus, Loader2 } from "lucide-react"
+import { Plus, Share2, X, ShoppingCart, Minus, Loader2, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useCart } from "@/contexts/CartContext"
 import { artworkService, type ArtworkResponse } from "@/api/artwork"
@@ -10,6 +10,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ArtworkCard } from "./ArtworkCard"
 import { motion, AnimatePresence } from "framer-motion"
 import { ImageSlider } from "@/components/animations/ImageSlider"
+import { useNavigate } from "react-router-dom"
+import { RichTextContent } from "@/components/richText/RichTextContent"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 type Orientation = "all" | "landscape" | "portrait"
 
@@ -21,6 +24,7 @@ export default function ArtworkList() {
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 	const { addItem, isLoading: isCartLoading } = useCart()
+	const navigate = useNavigate()
 
 	useEffect(() => {
 		const fetchArtworks = async () => {
@@ -84,6 +88,10 @@ export default function ArtworkList() {
 			addItem(selectedArtwork.id, quantity)
 			handleCloseDetail()
 		}
+	}
+
+	const handleViewPhotographer = (photographerId: number) => {
+		navigate(`/photographer/${photographerId}`)
 	}
 
 	// Check if there are previous/next artworks
@@ -183,13 +191,52 @@ export default function ArtworkList() {
 										exit={{ opacity: 0, y: -20 }}
 										transition={{ duration: 0.3 }}
 									>
+										{/* Photographer Info - Improved Section */}
+										{selectedArtwork.photographerId && (
+											<div className="mb-6">
+												<h4 className="text-sm font-medium text-white/60 mb-2">Photographer</h4>
+												<div
+													className="flex items-center gap-3 p-2 rounded-lg border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
+													onClick={() => handleViewPhotographer(selectedArtwork.photographerId)}
+												>
+													<Avatar className="h-10 w-10 border border-white/20">
+														<AvatarImage
+															src={selectedArtwork.photographerAvatar || "/placeholder.svg"}
+															alt={selectedArtwork.photographerName || "Photographer"}
+														/>
+														<AvatarFallback className="bg-purple-900/50">
+															<User className="h-5 w-5" />
+														</AvatarFallback>
+													</Avatar>
+													<div className="flex-1">
+														<h3 className="font-medium text-white text-sm">{selectedArtwork.photographerName}</h3>
+														<p className="text-xs text-white/60">{selectedArtwork.photographerEmail}</p>
+													</div>
+													<div className="text-xs text-purple-400">View profile</div>
+												</div>
+											</div>
+										)}
+
 										<h2 className="text-2xl font-bold mb-4">{selectedArtwork.title}</h2>
 										<div className="flex items-center justify-between mb-4">
 											<p className="text-xl font-bold">{selectedArtwork.price.toLocaleString("vi-VN")} ₫</p>
 										</div>
 										<p className="mb-4">{selectedArtwork.description}</p>
 										<p className="text-sm text-gray-400 mb-2">Location: {selectedArtwork.location}</p>
-										<p className="text-sm text-gray-400 mb-4">Story: {selectedArtwork.storyOfArt}</p>
+
+										{/* Story of Art - Updated to use RichTextContent */}
+										<div className="mb-4">
+											<h4 className="text-sm font-medium text-white/60 mb-1">Story:</h4>
+											{selectedArtwork.storyOfArt && selectedArtwork.storyOfArt.startsWith("<") ? (
+												<RichTextContent
+													html={selectedArtwork.storyOfArt}
+													className="text-sm text-white/80 max-h-[150px] overflow-y-auto pr-2"
+												/>
+											) : (
+												<p className="text-sm text-white/80">{selectedArtwork.storyOfArt}</p>
+											)}
+										</div>
+
 										<div className="flex flex-wrap gap-2 mb-4">
 											{selectedArtwork.tags.map((tag) => (
 												<span key={tag} className="px-2 py-1 bg-gray-800 rounded-full text-xs">
