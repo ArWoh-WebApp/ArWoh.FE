@@ -76,7 +76,7 @@ export function PhotographerProfile() {
             setIsLoading(true)
             const [profileRes, imagesRes] = await Promise.all([
                 photographerService.getPhotographerProfile(),
-                photographerService.getPhotographerImages(4), // Hardcoded ID for now
+                photographerService.getCurrentPhotographerImages(), // Hardcoded ID for now
             ])
 
             if (profileRes.isSuccess) {

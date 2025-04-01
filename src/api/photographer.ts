@@ -86,6 +86,21 @@ export const photographerService = {
         }
     },
 
+    getCurrentPhotographerImages: async (): Promise<ApiResponse<PhotographerImage[]>> => {
+        try {
+            const response = await axiosInstance.get<ApiResponse<PhotographerImage[]>>(
+                `/photographers/me/images`,
+            )
+            return response.data
+        } catch (error: any) {
+            return {
+                isSuccess: false,
+                message: error.message || "Failed to fetch photographer images",
+                data: [],
+            }
+        }
+    },
+
     // Get photographer images by Id
     getPhotographerImages: async (photographerId: number): Promise<ApiResponse<PhotographerImage[]>> => {
         try {
