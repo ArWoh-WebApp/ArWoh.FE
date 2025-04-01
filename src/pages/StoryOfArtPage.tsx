@@ -161,12 +161,16 @@ function ArtworkSection({ artwork, index, onViewPhotographer }: ArtworkSectionPr
         offset: ["start end", "end start"],
     })
 
-    const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0])
-    const xLeftValue = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [-100, 0, 0, -100])
-    const xRightValue = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [100, 0, 0, 100])
+    // Create a clean fade-in effect with minimal movement
+    const opacity = useTransform(scrollYProgress, [0, 0.25, 0.4, 0.8, 1], [0, 0.5, 1, 1, 0])
 
-    const xImageValue = isEven ? xRightValue : xLeftValue
-    const xTextValue = isEven ? xLeftValue : xRightValue
+    // Create separate progress trackers for text and image to stagger them slightly
+    const textProgress = useTransform(scrollYProgress, (value) => Math.min(value * 1.1, 1))
+    const imageProgress = useTransform(scrollYProgress, (value) => Math.min(value * 1.05, 1))
+
+    const textOpacity = useTransform(textProgress, [0, 0.25, 0.4, 0.8, 1], [0, 0.5, 1, 1, 0])
+
+    const imageOpacity = useTransform(imageProgress, [0, 0.25, 0.4, 0.8, 1], [0, 0.5, 1, 1, 0])
 
     return (
         <section ref={sectionRef} className="min-h-screen py-24 relative overflow-hidden">
@@ -175,10 +179,8 @@ function ArtworkSection({ artwork, index, onViewPhotographer }: ArtworkSectionPr
                     {/* Text Content */}
                     <motion.div
                         className="space-y-6"
-                        style={{
-                            opacity,
-                            x: xTextValue,
-                        }}
+                        style={{ opacity: textOpacity }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
                     >
                         <div className="space-y-2">
                             <p className="text-sm text-purple-400">Story of Art</p>
@@ -235,10 +237,8 @@ function ArtworkSection({ artwork, index, onViewPhotographer }: ArtworkSectionPr
 
                     {/* Image with 3D effect */}
                     <motion.div
-                        style={{
-                            opacity,
-                            x: xImageValue,
-                        }}
+                        style={{ opacity: imageOpacity }}
+                        transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
                         className="h-[700px] w-full aspect-square"
                     >
                         <ThreeDCard className="relative w-full h-full">
