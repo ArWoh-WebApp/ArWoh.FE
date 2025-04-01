@@ -65,7 +65,7 @@ export const PrintScreenProtection: React.FC = () => {
         }
 
         // Listen for key events with capture to get them early
-        document.addEventListener("keydown", handlePrintScreen, true)
+        document.addEventListener("keyup", handlePrintScreen, true)
         document.addEventListener("keydown", handleWinShiftS, true)
         document.addEventListener("visibilitychange", handleVisibilityChange)
 
