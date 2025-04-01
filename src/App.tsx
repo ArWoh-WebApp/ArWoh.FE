@@ -22,6 +22,8 @@ import PortfolioPage from "./pages/PortfolioPage"
 import PhotographerPublicPage from "./pages/PublicPhotographerPage"
 import { useEffect } from "react"
 import StoryOfArtPage from "./pages/StoryOfArtPage"
+import { SecurityWrapper } from "./components/security/SecurityWrapper"
+import PrintScreenProtection from "./components/security/PrintScreenProtection"
 
 // Define route patterns
 const routePatterns = [
@@ -31,7 +33,7 @@ const routePatterns = [
 	"/art-gallery",
 	"/user-profile",
 	"/photographer-profile",
-	"/photographer/:id", // Dynamic route pattern
+	"/photographer/:id",
 	"/portfolio",
 	"/story-of-art",
 	"/not-found",
@@ -74,109 +76,115 @@ const AppContent: React.FC = () => {
 	}, [location.pathname])
 
 	return (
-		<div className="flex min-h-screen flex-col">
-			{showHeaderFooter && <Header />}
-			<main className="flex-1">
-				<AnimatePresence mode="wait" initial={false}>
-					<Routes>
-						{/* Public Routes */}
-						<Route
-							path="/"
-							element={
-								<PageTransition>
-									<Home />
-								</PageTransition>
-							}
-						/>
-						<Route
-							path="/login"
-							element={
-								<ProtectedRoute requireAuth={false}>
-									<PageTransition>
-										<Login />
-									</PageTransition>
-								</ProtectedRoute>
-							}
-						/>
-						<Route
-							path="/register"
-							element={
-								<ProtectedRoute requireAuth={false}>
-									<PageTransition>
-										<Register />
-									</PageTransition>
-								</ProtectedRoute>
-							}
-						/>
-						<Route
-							path="/art-gallery"
-							element={
-								<PageTransition>
-									<ArtworkList />
-								</PageTransition>
-							}
-						/>
-						<Route
-							path="/portfolio"
-							element={
-								<PageTransition>
-									<PortfolioPage />
-								</PageTransition>
-							}
-						/>
-						<Route
-							path="/story-of-art"
-							element={
-								<PageTransition>
-									<StoryOfArtPage />
-								</PageTransition>
-							}
-						/>
-						<Route
-							path="/photographer/:id"
-							element={
-								<PageTransition>
-									<PhotographerPublicPage />
-								</PageTransition>
-							}
-						/>
+		<SecurityWrapper>
 
-						{/* Protected Routes */}
-						<Route
-							path="/user-profile"
-							element={
-								<ProtectedRoute requireAuth={true} requirePhotographer={false} requireAdmin={false}>
-									<PageTransition>
-										<UserPage />
-									</PageTransition>
-								</ProtectedRoute>
-							}
-						/>
-						<Route
-							path="/photographer-profile"
-							element={
-								<ProtectedRoute requireAuth={true} requirePhotographer={true} requireAdmin={false}>
-									<PageTransition>
-										<PhotographerPage />
-									</PageTransition>
-								</ProtectedRoute>
-							}
-						/>
+			{/* PrintScreenProtection */}
+			<PrintScreenProtection />
 
-						{/* 404 Page */}
-						<Route
-							path="*"
-							element={
-								<PageTransition>
-									<NotFound />
-								</PageTransition>
-							}
-						/>
-					</Routes>
-				</AnimatePresence>
-			</main>
-			{showHeaderFooter && <Footer />}
-		</div>
+			<div className="flex min-h-screen flex-col">
+				{showHeaderFooter && <Header />}
+				<main className="flex-1">
+					<AnimatePresence mode="wait" initial={false}>
+						<Routes>
+							{/* Public Routes */}
+							<Route
+								path="/"
+								element={
+									<PageTransition>
+										<Home />
+									</PageTransition>
+								}
+							/>
+							<Route
+								path="/login"
+								element={
+									<ProtectedRoute requireAuth={false}>
+										<PageTransition>
+											<Login />
+										</PageTransition>
+									</ProtectedRoute>
+								}
+							/>
+							<Route
+								path="/register"
+								element={
+									<ProtectedRoute requireAuth={false}>
+										<PageTransition>
+											<Register />
+										</PageTransition>
+									</ProtectedRoute>
+								}
+							/>
+							<Route
+								path="/art-gallery"
+								element={
+									<PageTransition>
+										<ArtworkList />
+									</PageTransition>
+								}
+							/>
+							<Route
+								path="/portfolio"
+								element={
+									<PageTransition>
+										<PortfolioPage />
+									</PageTransition>
+								}
+							/>
+							<Route
+								path="/story-of-art"
+								element={
+									<PageTransition>
+										<StoryOfArtPage />
+									</PageTransition>
+								}
+							/>
+							<Route
+								path="/photographer/:id"
+								element={
+									<PageTransition>
+										<PhotographerPublicPage />
+									</PageTransition>
+								}
+							/>
+
+							{/* Protected Routes */}
+							<Route
+								path="/user-profile"
+								element={
+									<ProtectedRoute requireAuth={true} requirePhotographer={false} requireAdmin={false}>
+										<PageTransition>
+											<UserPage />
+										</PageTransition>
+									</ProtectedRoute>
+								}
+							/>
+							<Route
+								path="/photographer-profile"
+								element={
+									<ProtectedRoute requireAuth={true} requirePhotographer={true} requireAdmin={false}>
+										<PageTransition>
+											<PhotographerPage />
+										</PageTransition>
+									</ProtectedRoute>
+								}
+							/>
+
+							{/* 404 Page */}
+							<Route
+								path="*"
+								element={
+									<PageTransition>
+										<NotFound />
+									</PageTransition>
+								}
+							/>
+						</Routes>
+					</AnimatePresence>
+				</main>
+				{showHeaderFooter && <Footer />}
+			</div>
+		</SecurityWrapper>
 	)
 }
 
@@ -195,4 +203,3 @@ const App: React.FC = () => {
 }
 
 export default App
-

@@ -161,9 +161,6 @@ function ArtworkSection({ artwork, index, onViewPhotographer }: ArtworkSectionPr
         offset: ["start end", "end start"],
     })
 
-    // Create a clean fade-in effect with minimal movement
-    const opacity = useTransform(scrollYProgress, [0, 0.25, 0.4, 0.8, 1], [0, 0.5, 1, 1, 0])
-
     // Create separate progress trackers for text and image to stagger them slightly
     const textProgress = useTransform(scrollYProgress, (value) => Math.min(value * 1.1, 1))
     const imageProgress = useTransform(scrollYProgress, (value) => Math.min(value * 1.05, 1))
