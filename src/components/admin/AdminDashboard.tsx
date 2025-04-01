@@ -1,21 +1,70 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { BarChart3, Image, Users } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { motion, AnimatePresence } from "framer-motion"
+import { fetchUserSummary, fetchImageSummary, fetchRevenueSummary, UserSummaryDTO, ImageSummaryDTO, RevenueSummaryDTO } from "@/api/dashboard" 
 
 export default function DashboardPage() {
   const [activeView, setActiveView] = useState<{ [key: string]: "stats" | "chart" }>({
     users: "stats",
     artworks: "stats",
   })
+  const [userSummary, setUserSummary] = useState<UserSummaryDTO | null>(null)
+  const [imageSummary, setImageSummary] = useState<ImageSummaryDTO | null>(null)
+  const [revenueSummary, setRevenueSummary] = useState<RevenueSummaryDTO | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const toggleView = (card: string) => {
     setActiveView((prev) => ({
       ...prev,
       [card]: prev[card] === "stats" ? "chart" : "stats",
     }))
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const [userRes, imageRes, revenueRes] = await Promise.all([
+          fetchUserSummary(),
+          fetchImageSummary(),
+          fetchRevenueSummary(),
+        ])
+
+        if (!userRes.isSuccess) throw new Error(userRes.message)
+        if (!imageRes.isSuccess) throw new Error(imageRes.message)
+        if (!revenueRes.isSuccess) throw new Error(revenueRes.message)
+
+        setUserSummary(userRes.data)
+        setImageSummary(imageRes.data)
+        setRevenueSummary(revenueRes.data)
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch dashboard data")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen w-full bg-zinc-900 flex items-center justify-center">
+        <p className="text-white">Loading...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen w-full bg-zinc-900 flex items-center justify-center">
+        <p className="text-red-400">{error}</p>
+      </div>
+    )
   }
 
   return (
@@ -29,11 +78,9 @@ export default function DashboardPage() {
             className="bg-zinc-800 border-zinc-700 cursor-pointer transition-all hover:bg-zinc-750 hover:shadow-lg relative overflow-hidden"
             onClick={() => toggleView("users")}
           >
-            {/* Subtle indicator in corner */}
             <div className="absolute top-2 right-2 text-xs text-zinc-500">
               Click to {activeView.users === "stats" ? "view chart" : "view stats"}
             </div>
-
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-zinc-100">Total Users</CardTitle>
               <Users className="h-4 w-4 text-zinc-400" />
@@ -49,23 +96,31 @@ export default function DashboardPage() {
                     transition={{ duration: 0.3 }}
                     className="text-center"
                   >
-                    <div className="text-4xl font-bold text-white mb-2">1,248</div>
+                    <div className="text-4xl font-bold text-white mb-2">
+                      {userSummary?.totalUsers.toLocaleString()}
+                    </div>
                     <p className="text-sm text-zinc-400 mb-3">Total registered users</p>
                     <div className="flex justify-center space-x-6 mt-4">
                       <div className="text-center">
-                        <div className="text-xl font-semibold text-white">850</div>
+                        <div className="text-xl font-semibold text-white">
+                          {userSummary?.userCount.toLocaleString()}
+                        </div>
                         <p className="text-xs text-zinc-400">Regular Users</p>
                       </div>
                       <div className="text-center">
-                        <div className="text-xl font-semibold text-white">320</div>
+                        <div className="text-xl font-semibold text-white">
+                          {userSummary?.photographerCount.toLocaleString()}
+                        </div>
                         <p className="text-xs text-zinc-400">Photographers</p>
                       </div>
                       <div className="text-center">
-                        <div className="text-xl font-semibold text-white">78</div>
+                        <div className="text-xl font-semibold text-white">
+                          {userSummary?.adminCount.toLocaleString()}
+                        </div>
                         <p className="text-xs text-zinc-400">Admins</p>
                       </div>
                     </div>
-                    <div className="mt-4 text-xs text-green-400 font-medium">+12% from last month</div>
+                    <div className="mt-4 text-xs text-green-400 font-medium">All users from system</div>
                   </motion.div>
                 ) : (
                   <motion.div
@@ -76,25 +131,23 @@ export default function DashboardPage() {
                     transition={{ duration: 0.3 }}
                     className="w-full h-[180px]"
                   >
-                    <UserTypePieChart />
+                    <UserTypePieChart
+                      data={{
+                        regularUsers: userSummary?.userCount || 0,
+                        photographers: userSummary?.photographerCount || 0,
+                        admins: userSummary?.adminCount || 0,
+                      }}
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>
             </CardContent>
-
-            {/* Pulse effect on the border when in chart view */}
             {activeView.users === "chart" && (
               <div className="absolute inset-0 border border-blue-500/50 rounded-lg pointer-events-none">
                 <motion.div
                   className="absolute inset-0 border border-blue-500 rounded-lg"
-                  animate={{
-                    opacity: [0.5, 1, 0.5],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Number.POSITIVE_INFINITY,
-                    ease: "easeInOut",
-                  }}
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
                 />
               </div>
             )}
@@ -104,11 +157,9 @@ export default function DashboardPage() {
             className="bg-zinc-800 border-zinc-700 cursor-pointer transition-all hover:bg-zinc-750 hover:shadow-lg relative overflow-hidden"
             onClick={() => toggleView("artworks")}
           >
-            {/* Subtle indicator in corner */}
             <div className="absolute top-2 right-2 text-xs text-zinc-500">
               Click to {activeView.artworks === "stats" ? "view chart" : "view stats"}
             </div>
-
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-zinc-100">Total Artworks</CardTitle>
               <Image className="h-4 w-4 text-zinc-400" />
@@ -124,23 +175,29 @@ export default function DashboardPage() {
                     transition={{ duration: 0.3 }}
                     className="text-center"
                   >
-                    <div className="text-4xl font-bold text-white mb-2">3,456</div>
+                    <div className="text-4xl font-bold text-white mb-2">
+                      {imageSummary?.totalImages.toLocaleString()}
+                    </div>
                     <p className="text-sm text-zinc-400 mb-3">Total artworks in gallery</p>
                     <div className="flex justify-center space-x-6 mt-4">
-                      <div className="text-center">
-                        <div className="text-xl font-semibold text-white">1,450</div>
-                        <p className="text-xs text-zinc-400">Paintings</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xl font-semibold text-white">1,050</div>
-                        <p className="text-xs text-zinc-400">Photography</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xl font-semibold text-white">956</div>
-                        <p className="text-xs text-zinc-400">Other</p>
-                      </div>
+                      {Object.entries(imageSummary?.imageOrientations || {}).map(([key, value]) => (
+                        <div key={key} className="text-center">
+                          <div className="text-xl font-semibold text-white">{value.toLocaleString()}</div>
+                          <p className="text-xs text-zinc-400">{key}</p>
+                        </div>
+                      ))}
+                      {(() => {
+                        const orientationsSum = Object.values(imageSummary?.imageOrientations || {}).reduce((sum, val) => sum + val, 0);
+                        const otherCount = (imageSummary?.totalImages || 0) - orientationsSum;
+                        return otherCount > 0 ? (
+                          <div className="text-center">
+                            <div className="text-xl font-semibold text-white">{otherCount.toLocaleString()}</div>
+                            <p className="text-xs text-zinc-400">Other</p>
+                          </div>
+                        ) : null;
+                      })()}
                     </div>
-                    <div className="mt-4 text-xs text-green-400 font-medium">+8% from last month</div>
+                    <div className="mt-4 text-xs text-green-400 font-medium">All artworks from system</div>
                   </motion.div>
                 ) : (
                   <motion.div
@@ -151,33 +208,25 @@ export default function DashboardPage() {
                     transition={{ duration: 0.3 }}
                     className="w-full h-[180px]"
                   >
-                    <ArtworkTypePieChart />
+                    <ArtworkTypePieChart orientations={imageSummary?.imageOrientations || {}} totalImages={imageSummary?.totalImages || 0} />
                   </motion.div>
                 )}
               </AnimatePresence>
             </CardContent>
-
-            {/* Pulse effect on the border when in chart view */}
             {activeView.artworks === "chart" && (
               <div className="absolute inset-0 border border-blue-500/50 rounded-lg pointer-events-none">
                 <motion.div
                   className="absolute inset-0 border border-blue-500 rounded-lg"
-                  animate={{
-                    opacity: [0.5, 1, 0.5],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Number.POSITIVE_INFINITY,
-                    ease: "easeInOut",
-                  }}
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
                 />
               </div>
             )}
           </Card>
         </div>
 
-        <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4 bg-zinc-800 border-zinc-700">
+        <div className="mt-6 grid gap-6 md:grid-cols-1 lg:grid-cols-1">
+          <Card className="bg-zinc-800 border-zinc-700">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="text-zinc-100">Total Revenue</CardTitle>
@@ -188,37 +237,20 @@ export default function DashboardPage() {
             <CardContent>
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <div className="text-2xl font-bold text-white">$124,580</div>
-                  <p className="text-xs text-zinc-400">+18% from last month</p>
+                  <div className="text-2xl font-bold text-white">
+                    ${(revenueSummary?.totalRevenue ?? 0).toLocaleString()}
+                  </div>
+                  <p className="text-xs text-zinc-400">Earn this month</p>
                 </div>
                 <div className="text-right">
                   <div className="text-sm font-medium text-zinc-100">Yearly Projection</div>
-                  <div className="text-lg font-semibold text-white">$1,495,000</div>
+                  <div className="text-lg font-semibold text-white">
+                    ${((revenueSummary?.totalRevenue ?? 0) * 12).toLocaleString()}
+                  </div>
                 </div>
               </div>
               <div className="h-[300px]">
-                <RevenueDetailChart />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="col-span-3 bg-zinc-800 border-zinc-700">
-            <CardHeader>
-              <CardTitle className="text-zinc-100">Recent Sales</CardTitle>
-              <CardDescription className="text-zinc-400">Latest 5 sales</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentSales.map((sale, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-blue-500/10"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-zinc-100">{sale.customer}</p>
-                      <p className="text-xs text-zinc-400">{sale.artwork}</p>
-                    </div>
-                    <div className="text-sm font-medium text-zinc-100">${sale.amount}</div>
-                  </div>
-                ))}
+                <RevenueDetailChart monthlyRevenue={revenueSummary?.monthlyRevenue || {}} />
               </div>
             </CardContent>
           </Card>
@@ -228,25 +260,16 @@ export default function DashboardPage() {
   )
 }
 
-// Sample data for charts
-const recentSales = [
-  { customer: "John Doe", artwork: "Abstract Landscape", amount: 1200 },
-  { customer: "Jane Smith", artwork: "Modern Portrait", amount: 850 },
-  { customer: "Robert Johnson", artwork: "City Skyline", amount: 1500 },
-  { customer: "Emily Davis", artwork: "Nature Scene", amount: 950 },
-  { customer: "Michael Brown", artwork: "Surreal Composition", amount: 1100 },
-]
-
-function UserTypePieChart() {
+function UserTypePieChart({ data }: { data: { regularUsers: number; photographers: number; admins: number } }) {
   const [hoveredSegment, setHoveredSegment] = useState<number | null>(null)
 
-  const data = [
-    { name: "Regular Users", value: 850, color: "#3b82f6" },
-    { name: "Photographers", value: 320, color: "#8b5cf6" },
-    { name: "Admins", value: 78, color: "#ec4899" },
+  const chartData = [
+    { name: "Regular Users", value: data.regularUsers, color: "#3b82f6" },
+    { name: "Photographers", value: data.photographers, color: "#8b5cf6" },
+    { name: "Admins", value: data.admins, color: "#ec4899" },
   ]
 
-  const total = data.reduce((sum, item) => sum + item.value, 0)
+  const total = chartData.reduce((sum, item) => sum + item.value, 0)
 
   return (
     <motion.div
@@ -257,8 +280,8 @@ function UserTypePieChart() {
     >
       <div className="relative h-40 w-40">
         <svg viewBox="0 0 100 100" className="h-full w-full">
-          {data.map((item, i) => {
-            const startAngle = i === 0 ? 0 : data.slice(0, i).reduce((sum, d) => sum + (d.value / total) * 360, 0)
+          {chartData.map((item, i) => {
+            const startAngle = i === 0 ? 0 : chartData.slice(0, i).reduce((sum, d) => sum + (d.value / total) * 360, 0)
             const endAngle = startAngle + (item.value / total) * 360
 
             const x1 = 50 + 40 * Math.cos(((startAngle - 90) * Math.PI) / 180)
@@ -268,14 +291,9 @@ function UserTypePieChart() {
 
             const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0
 
-            // Calculate midpoint angle for the tooltip position
             const midAngle = startAngle + (endAngle - startAngle) / 2
             const midX = 50 + 30 * Math.cos(((midAngle - 90) * Math.PI) / 180)
             const midY = 50 + 30 * Math.sin(((midAngle - 90) * Math.PI) / 180)
-
-            // Calculate outer point for the indicator line
-            const outerX = 50 + 45 * Math.cos(((midAngle - 90) * Math.PI) / 180)
-            const outerY = 50 + 45 * Math.sin(((midAngle - 90) * Math.PI) / 180)
 
             return (
               <g key={item.name}>
@@ -288,19 +306,13 @@ function UserTypePieChart() {
                     scale: hoveredSegment === i ? 1.05 : 1,
                     filter: hoveredSegment === i ? "brightness(1.2)" : "brightness(1)",
                   }}
-                  transition={{
-                    duration: 0.8,
-                    delay: 0.2 + i * 0.1,
-                    scale: { duration: 0.2 },
-                  }}
+                  transition={{ duration: 0.8, delay: 0.2 + i * 0.1, scale: { duration: 0.2 } }}
                   onMouseEnter={() => setHoveredSegment(i)}
                   onMouseLeave={() => setHoveredSegment(null)}
                   style={{ transformOrigin: "center" }}
                 />
-
                 {hoveredSegment === i && (
                   <g>
-                    {/* Animated dot with percentage */}
                     <motion.circle
                       cx={midX}
                       cy={midY}
@@ -310,8 +322,6 @@ function UserTypePieChart() {
                       animate={{ scale: [0, 1.5, 1] }}
                       transition={{ duration: 0.3 }}
                     />
-
-                    {/* Value display */}
                     <motion.text
                       x={midX + (midX > 50 ? 8 : -8)}
                       y={midY}
@@ -334,23 +344,14 @@ function UserTypePieChart() {
           <circle cx="50" cy="50" r="25" fill="#1f2937" />
         </svg>
       </div>
-
       <div className="ml-4 space-y-2">
-        {data.map((item, i) => (
+        {chartData.map((item, i) => (
           <motion.div
             key={item.name}
             className="flex items-center"
             initial={{ opacity: 0, y: 5 }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              scale: hoveredSegment === i ? 1.1 : 1,
-            }}
-            transition={{
-              duration: 0.3,
-              delay: 0.4 + i * 0.1,
-              scale: { duration: 0.2 },
-            }}
+            animate={{ opacity: 1, y: 0, scale: hoveredSegment === i ? 1.1 : 1 }}
+            transition={{ duration: 0.3, delay: 0.4 + i * 0.1, scale: { duration: 0.2 } }}
             onMouseEnter={() => setHoveredSegment(i)}
             onMouseLeave={() => setHoveredSegment(null)}
           >
@@ -362,7 +363,7 @@ function UserTypePieChart() {
               }}
             ></div>
             <div className="text-xs text-zinc-300">
-              {item.name}: {item.value} ({Math.round((item.value / total) * 100)}%)
+              {item.name}: {item.value.toLocaleString()} ({Math.round((item.value / total) * 100)}%)
             </div>
           </motion.div>
         ))}
@@ -371,17 +372,24 @@ function UserTypePieChart() {
   )
 }
 
-function ArtworkTypePieChart() {
+function ArtworkTypePieChart({ orientations, totalImages }: { orientations: { [key: string]: number }; totalImages: number }) {
   const [hoveredSegment, setHoveredSegment] = useState<number | null>(null)
 
-  const data = [
-    { name: "Paintings", value: 1450, color: "#3b82f6" },
-    { name: "Photography", value: 1050, color: "#8b5cf6" },
-    { name: "Digital Art", value: 650, color: "#ec4899" },
-    { name: "Sculptures", value: 306, color: "#f97316" },
+  const orientationsSum = Object.values(orientations).reduce((sum, val) => sum + val, 0)
+
+  const otherCount = totalImages - orientationsSum
+
+
+  const chartData = [
+    ...Object.entries(orientations).map(([name, value], i) => ({
+      name,
+      value,
+      color: ["#3b82f6", "#8b5cf6", "#ec4899", "#f97316"][i % 4],
+    })),
+    ...(otherCount > 0 ? [{ name: "Other", value: otherCount, color: "#f97316" }] : []),
   ]
 
-  const total = data.reduce((sum, item) => sum + item.value, 0)
+  const total = chartData.reduce((sum, item) => sum + item.value, 0)
 
   return (
     <motion.div
@@ -392,8 +400,8 @@ function ArtworkTypePieChart() {
     >
       <div className="relative h-40 w-40">
         <svg viewBox="0 0 100 100" className="h-full w-full">
-          {data.map((item, i) => {
-            const startAngle = i === 0 ? 0 : data.slice(0, i).reduce((sum, d) => sum + (d.value / total) * 360, 0)
+          {chartData.map((item, i) => {
+            const startAngle = i === 0 ? 0 : chartData.slice(0, i).reduce((sum, d) => sum + (d.value / total) * 360, 0)
             const endAngle = startAngle + (item.value / total) * 360
 
             const x1 = 50 + 40 * Math.cos(((startAngle - 90) * Math.PI) / 180)
@@ -403,14 +411,9 @@ function ArtworkTypePieChart() {
 
             const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0
 
-            // Calculate midpoint angle for the tooltip position
             const midAngle = startAngle + (endAngle - startAngle) / 2
             const midX = 50 + 30 * Math.cos(((midAngle - 90) * Math.PI) / 180)
             const midY = 50 + 30 * Math.sin(((midAngle - 90) * Math.PI) / 180)
-
-            // Calculate outer point for the indicator line
-            const outerX = 50 + 45 * Math.cos(((midAngle - 90) * Math.PI) / 180)
-            const outerY = 50 + 45 * Math.sin(((midAngle - 90) * Math.PI) / 180)
 
             return (
               <g key={item.name}>
@@ -423,19 +426,13 @@ function ArtworkTypePieChart() {
                     scale: hoveredSegment === i ? 1.05 : 1,
                     filter: hoveredSegment === i ? "brightness(1.2)" : "brightness(1)",
                   }}
-                  transition={{
-                    duration: 0.8,
-                    delay: 0.2 + i * 0.1,
-                    scale: { duration: 0.2 },
-                  }}
+                  transition={{ duration: 0.8, delay: 0.2 + i * 0.1, scale: { duration: 0.2 } }}
                   onMouseEnter={() => setHoveredSegment(i)}
                   onMouseLeave={() => setHoveredSegment(null)}
                   style={{ transformOrigin: "center" }}
                 />
-
                 {hoveredSegment === i && (
                   <g>
-                    {/* Animated dot with percentage */}
                     <motion.circle
                       cx={midX}
                       cy={midY}
@@ -445,8 +442,6 @@ function ArtworkTypePieChart() {
                       animate={{ scale: [0, 1.5, 1] }}
                       transition={{ duration: 0.3 }}
                     />
-
-                    {/* Value display */}
                     <motion.text
                       x={midX + (midX > 50 ? 8 : -8)}
                       y={midY}
@@ -469,23 +464,14 @@ function ArtworkTypePieChart() {
           <circle cx="50" cy="50" r="25" fill="#1f2937" />
         </svg>
       </div>
-
       <div className="ml-4 space-y-2">
-        {data.map((item, i) => (
+        {chartData.map((item, i) => (
           <motion.div
             key={item.name}
             className="flex items-center"
             initial={{ opacity: 0, y: 5 }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              scale: hoveredSegment === i ? 1.1 : 1,
-            }}
-            transition={{
-              duration: 0.3,
-              delay: 0.4 + i * 0.1,
-              scale: { duration: 0.2 },
-            }}
+            animate={{ opacity: 1, y: 0, scale: hoveredSegment === i ? 1.1 : 1 }}
+            transition={{ duration: 0.3, delay: 0.4 + i * 0.1, scale: { duration: 0.2 } }}
             onMouseEnter={() => setHoveredSegment(i)}
             onMouseLeave={() => setHoveredSegment(null)}
           >
@@ -497,7 +483,7 @@ function ArtworkTypePieChart() {
               }}
             ></div>
             <div className="text-xs text-zinc-300">
-              {item.name}: {item.value} ({Math.round((item.value / total) * 100)}%)
+              {item.name}: {item.value.toLocaleString()} ({Math.round((item.value / total) * 100)}%)
             </div>
           </motion.div>
         ))}
@@ -506,41 +492,32 @@ function ArtworkTypePieChart() {
   )
 }
 
-function RevenueDetailChart() {
+function RevenueDetailChart({ monthlyRevenue }: { monthlyRevenue: { [key: string]: number } }) {
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null)
 
-  const data = [
-    { month: "Jan", revenue: 8500 },
-    { month: "Feb", revenue: 9200 },
-    { month: "Mar", revenue: 10500 },
-    { month: "Apr", revenue: 9800 },
-    { month: "May", revenue: 11200 },
-    { month: "Jun", revenue: 12500 },
-    { month: "Jul", revenue: 13800 },
-    { month: "Aug", revenue: 14200 },
-    { month: "Sep", revenue: 13500 },
-    { month: "Oct", revenue: 15000 },
-    { month: "Nov", revenue: 16200 },
-    { month: "Dec", revenue: 18500 },
-  ]
+  const data = Object.entries(monthlyRevenue).map(([month, revenue]) => ({ month, revenue }))
+  const maxRevenue = Math.max(...data.map((d) => d.revenue), 0)
+  const minRevenue = Math.min(...data.map((d) => d.revenue), 0)
 
-  const maxRevenue = Math.max(...data.map((d) => d.revenue))
-  const minRevenue = Math.min(...data.map((d) => d.revenue))
-
-  const pathData = data
-    .map((d, i) => {
-      const x = (i / (data.length - 1)) * 1200
-      const y = 300 - ((d.revenue - minRevenue) / (maxRevenue - minRevenue)) * 300
-      return `${i === 0 ? "M" : "L"} ${x} ${y}`
-    })
-    .join(" ")
-
-  const areaPathData = `
-    ${pathData}
-    L ${1200} ${300}
-    L ${0} ${300}
-    Z
-  `
+  let pathData = ""
+  let areaPathData = ""
+  if (data.length === 0) {
+    pathData = "M 0 300 L 1200 300"
+    areaPathData = "M 0 300 L 1200 300 L 1200 300 L 0 300 Z"
+  } else if (data.length === 1) {
+    const y = maxRevenue === minRevenue ? 150 : 300 - ((data[0].revenue - minRevenue) / (maxRevenue - minRevenue)) * 300
+    pathData = `M 0 ${y} L 1200 ${y}`
+    areaPathData = `M 0 ${y} L 1200 ${y} L 1200 300 L 0 300 Z`
+  } else {
+    pathData = data
+      .map((d, i) => {
+        const x = (i / (data.length - 1)) * 1200
+        const y = maxRevenue === minRevenue ? 150 : 300 - ((d.revenue - minRevenue) / (maxRevenue - minRevenue)) * 300
+        return `${i === 0 ? "M" : "L"} ${x} ${y}`
+      })
+      .join(" ")
+    areaPathData = `${pathData} L 1200 300 L 0 300 Z`
+  }
 
   return (
     <div className="h-full w-full">
@@ -551,8 +528,8 @@ function RevenueDetailChart() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <span>${minRevenue}</span>
-          <span>${maxRevenue}</span>
+          <span>${minRevenue.toLocaleString()}</span>
+          <span>${maxRevenue.toLocaleString()}</span>
         </motion.div>
         <div className="flex-1 relative">
           <svg className="w-full h-full" viewBox="0 0 1200 300" preserveAspectRatio="none">
@@ -562,8 +539,6 @@ function RevenueDetailChart() {
                 <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
               </linearGradient>
             </defs>
-
-            {/* Grid lines */}
             <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.2 }}>
               <line x1="0" y1="0" x2="1200" y2="0" stroke="#374151" strokeWidth="1" />
               <line x1="0" y1="75" x2="1200" y2="75" stroke="#374151" strokeWidth="1" />
@@ -571,8 +546,6 @@ function RevenueDetailChart() {
               <line x1="0" y1="225" x2="1200" y2="225" stroke="#374151" strokeWidth="1" />
               <line x1="0" y1="300" x2="1200" y2="300" stroke="#374151" strokeWidth="1" />
             </motion.g>
-
-            {/* Line chart */}
             <motion.path
               d={pathData}
               fill="none"
@@ -582,8 +555,6 @@ function RevenueDetailChart() {
               animate={{ pathLength: 1, opacity: 1 }}
               transition={{ duration: 1.5, ease: "easeInOut" }}
             />
-
-            {/* Area under the line */}
             <motion.path
               d={areaPathData}
               fill="url(#gradient)"
@@ -591,64 +562,59 @@ function RevenueDetailChart() {
               animate={{ opacity: 1 }}
               transition={{ duration: 1, delay: 0.5 }}
             />
-
-            {/* Data points */}
-            {data.map((d, i) => {
-              const x = (i / (data.length - 1)) * 1200
-              const y = 300 - ((d.revenue - minRevenue) / (maxRevenue - minRevenue)) * 300
-              return (
-                <g key={i}>
-                  <motion.circle
-                    cx={x}
-                    cy={y}
-                    r={hoveredPoint === i ? "6" : "4"}
-                    fill={hoveredPoint === i ? "#fff" : "#3b82f6"}
-                    stroke={hoveredPoint === i ? "#3b82f6" : "none"}
-                    strokeWidth="2"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{
-                      scale: 1,
-                      opacity: 1,
-                    }}
-                    transition={{ duration: 0.3, delay: 1 + i * 0.05 }}
-                    onMouseEnter={() => setHoveredPoint(i)}
-                    onMouseLeave={() => setHoveredPoint(null)}
-                    style={{ cursor: "pointer" }}
-                  />
-
-                  {hoveredPoint === i && (
-                    <g>
-                      <motion.rect
-                        x={x - 35}
-                        y={y - 35}
-                        width="70"
-                        height="25"
-                        rx="4"
-                        fill="#1f2937"
-                        stroke="#3b82f6"
-                        strokeWidth="1"
-                        initial={{ opacity: 0, y: y - 25 }}
-                        animate={{ opacity: 1, y: y - 35 }}
-                        transition={{ duration: 0.2 }}
-                      />
-                      <motion.text
-                        x={x}
-                        y={y - 22}
-                        textAnchor="middle"
-                        fill="#fff"
-                        fontSize="12"
-                        fontWeight="bold"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        ${d.revenue.toLocaleString()}
-                      </motion.text>
-                    </g>
-                  )}
-                </g>
-              )
-            })}
+            {data.length > 0 &&
+              data.map((d, i) => {
+                const x = data.length === 1 ? 600 : (i / (data.length - 1)) * 1200
+                const y = maxRevenue === minRevenue ? 150 : 300 - ((d.revenue - minRevenue) / (maxRevenue - minRevenue)) * 300
+                return (
+                  <g key={i}>
+                    <motion.circle
+                      cx={x}
+                      cy={y}
+                      r={hoveredPoint === i ? "6" : "4"}
+                      fill={hoveredPoint === i ? "#fff" : "#3b82f6"}
+                      stroke={hoveredPoint === i ? "#3b82f6" : "none"}
+                      strokeWidth="2"
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.3, delay: 1 + i * 0.05 }}
+                      onMouseEnter={() => setHoveredPoint(i)}
+                      onMouseLeave={() => setHoveredPoint(null)}
+                      style={{ cursor: "pointer" }}
+                    />
+                    {hoveredPoint === i && (
+                      <g>
+                        <motion.rect
+                          x={x - 35}
+                          y={y - 35}
+                          width="70"
+                          height="25"
+                          rx="4"
+                          fill="#1f2937"
+                          stroke="#3b82f6"
+                          strokeWidth="1"
+                          initial={{ opacity: 0, y: y - 25 }}
+                          animate={{ opacity: 1, y: y - 35 }}
+                          transition={{ duration: 0.2 }}
+                        />
+                        <motion.text
+                          x={x}
+                          y={y - 22}
+                          textAnchor="middle"
+                          fill="#fff"
+                          fontSize="12"
+                          fontWeight="bold"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          ${d.revenue.toLocaleString()}
+                        </motion.text>
+                      </g>
+                    )}
+                  </g>
+                )
+              })}
           </svg>
         </div>
         <motion.div
@@ -657,23 +623,26 @@ function RevenueDetailChart() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          {data.map((d, i) => (
-            <motion.span
-              key={i}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3, delay: 0.5 + i * 0.03 }}
-              className={hoveredPoint === i ? "text-blue-400 font-medium" : ""}
-              onMouseEnter={() => setHoveredPoint(i)}
-              onMouseLeave={() => setHoveredPoint(null)}
-              style={{ cursor: "pointer" }}
-            >
-              {d.month}
-            </motion.span>
-          ))}
+          {data.length > 0 ? (
+            data.map((d, i) => (
+              <motion.span
+                key={i}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.5 + i * 0.03 }}
+                className={hoveredPoint === i ? "text-blue-400 font-medium" : ""}
+                onMouseEnter={() => setHoveredPoint(i)}
+                onMouseLeave={() => setHoveredPoint(null)}
+                style={{ cursor: "pointer" }}
+              >
+                {d.month}
+              </motion.span>
+            ))
+          ) : (
+            <span>No data available</span>
+          )}
         </motion.div>
       </div>
     </div>
   )
 }
-

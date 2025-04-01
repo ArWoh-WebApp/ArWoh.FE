@@ -1,63 +1,69 @@
-interface UserSummaryDTO {
+import axiosInstance from "./axiosInstance";
+
+export interface ApiResponse<T> {
+    isSuccess: boolean;
+    message: string;
+    data: T;
+}
+
+export interface UserSummaryDTO {
     totalUsers: number;
     adminCount: number;
     userCount: number;
     photographerCount: number;
 }
 
-interface ImageSummaryDTO {
+export interface ImageSummaryDTO {
     totalImages: number;
     imageOrientations: { [key: string]: number };
 }
 
-interface RevenueSummaryDTO {
+export interface RevenueSummaryDTO {
     totalRevenue: number;
     monthlyRevenue: { [key: string]: number };
 }
 
-const API_BASE_URL = "http://localhost:9090/api"; 
-
-export const fetchUserSummary = async (): Promise<UserSummaryDTO> => {
-    const response = await fetch(`${API_BASE_URL}/dashboard/users/summary`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error("Failed to fetch user summary");
+export const fetchUserSummary = async (): Promise<ApiResponse<UserSummaryDTO>> => {
+    try {
+        const response = await axiosInstance.get<ApiResponse<UserSummaryDTO>>(
+            "http://localhost:9090/api/dashboard/users/summary"
+        );
+        return response.data;
+    } catch (error: any) {
+        return {
+            isSuccess: false,
+            message: error.message || "Failed to fetch user summary",
+            data: null as any, 
+        };
     }
-
-    return response.json();
 };
 
-export const fetchImageSummary = async (): Promise<ImageSummaryDTO> => {
-    const response = await fetch(`${API_BASE_URL}/dashboard/images/summary`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error("Failed to fetch image summary");
+export const fetchImageSummary = async (): Promise<ApiResponse<ImageSummaryDTO>> => {
+    try {
+        const response = await axiosInstance.get<ApiResponse<ImageSummaryDTO>>(
+            "http://localhost:9090/api/dashboard/images/summary"
+        );
+        return response.data;
+    } catch (error: any) {
+        return {
+            isSuccess: false,
+            message: error.message || "Failed to fetch image summary",
+            data: null as any,
+        };
     }
-
-    return response.json();
 };
 
-export const fetchRevenueSummary = async (): Promise<RevenueSummaryDTO> => {
-    const response = await fetch(`${API_BASE_URL}/dashboard/revenue/summary`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error("Failed to fetch revenue summary");
+export const fetchRevenueSummary = async (): Promise<ApiResponse<RevenueSummaryDTO>> => {
+    try {
+        const response = await axiosInstance.get<ApiResponse<RevenueSummaryDTO>>(
+            "http://localhost:9090/api/dashboard/revenue/summary"
+        );
+        return response.data;
+    } catch (error: any) {
+        return {
+            isSuccess: false,
+            message: error.message || "Failed to fetch revenue summary",
+            data: null as any,
+        };
     }
-
-    return response.json();
 };
