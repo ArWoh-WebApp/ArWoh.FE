@@ -122,7 +122,7 @@ export default function PortfolioPage() {
                                 <div className="mt-4 flex justify-between">
                                     <span className="text-sm text-purple-400">View Portfolio</span>
                                     <span className="rounded-full bg-purple-500/20 px-2 py-1 text-xs font-medium text-purple-300">
-                                        {photographer.role}
+                                        Photographer
                                     </span>
                                 </div>
                             </div>
