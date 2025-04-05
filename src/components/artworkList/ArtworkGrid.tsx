@@ -30,6 +30,7 @@ export default function ArtworkList() {
 		const fetchArtworks = async () => {
 			try {
 				const response = await artworkService.getArtworks()
+				//const response = await artworkService.getRandomArtwork()
 				if (response.isSuccess) {
 					setArtworks(response.data)
 				} else {

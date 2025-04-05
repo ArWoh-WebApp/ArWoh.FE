@@ -17,32 +17,30 @@ import { toast } from "sonner"
 
 import logoImage from "@/assets/images/logo.png"
 
-// Memoized Iridescence to prevent unnecessary re-renders
-const MemoizedIridescence = memo(Iridescence)
+// Memoized Iridescence with frozen props to prevent re-renders
+const MemoizedIridescence = memo(Iridescence, () => true) // Force the component to never re-render
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
   const { login } = useAuth()
-  const emailRef = useRef<HTMLInputElement | null>(null)
-  const passwordRef = useRef<HTMLInputElement | null>(null)
-
-  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (emailRef.current) emailRef.current.value = e.target.value
-    setEmail(e.target.value)
-  }, [])
-
-  const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (passwordRef.current) passwordRef.current.value = e.target.value
-    setPassword(e.target.value)
+  
+  // Use refs instead of state for form fields to prevent re-renders during typing
+  const emailRef = useRef<HTMLInputElement>(null)
+  const passwordRef = useRef<HTMLInputElement>(null)
+  
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword(prev => !prev)
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+
+    // Get values from refs at submit time rather than tracking with state
+    const email = emailRef.current?.value || ""
+    const password = passwordRef.current?.value || ""
 
     try {
       // First, attempt to login
@@ -84,14 +82,19 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen w-full relative bg-[#0D0D0D] overflow-hidden">
-      {/* Animated Background */}
+      {/* Animated Background - Rendered only once and never re-rendered */}
       <div className="absolute inset-0">
-        <MemoizedIridescence color={[0.2, 0, 0.3]} speed={1} amplitude={0.1} mouseReact={false} />
+        <MemoizedIridescence 
+          color={[0.2, 0, 0.3]}
+          speed={1} 
+          amplitude={0.1} 
+          mouseReact={false} 
+        />
       </div>
 
       {/* Logo */}
       <div className="relative z-10 p-6">
-        <img src={logoImage || "/placeholder.svg"} alt="ArWoh" className="h-8d" />
+        <img src={logoImage || "/placeholder.svg"} alt="ArWoh" className="h-8" />
       </div>
 
       {/* Login Form */}
@@ -116,8 +119,6 @@ export default function LoginPage() {
                 placeholder="skibidi@fpt.edu.com"
                 type="email"
                 ref={emailRef}
-                value={email}
-                onChange={handleEmailChange}
                 required
               />
             </LabelInputContainer>
@@ -131,13 +132,11 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   type={showPassword ? "text" : "password"}
                   ref={passwordRef}
-                  value={password}
-                  onChange={handlePasswordChange}
                   required
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={togglePasswordVisibility}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -169,7 +168,7 @@ export default function LoginPage() {
   )
 }
 
-const LabelInputContainer = ({
+const LabelInputContainer = memo(({
   children,
   className,
 }: {
@@ -177,5 +176,4 @@ const LabelInputContainer = ({
   className?: string
 }) => {
   return <div className={cn("flex flex-col space-y-2 w-full", className)}>{children}</div>
-}
-
+})
