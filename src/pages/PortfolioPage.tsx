@@ -58,11 +58,8 @@ export default function PortfolioPage() {
     }
 
     const handlePhotographerClick = (photographerId: number) => {
-
-        // Navigate to the photographer's profile page
-        // You might need to adjust this based on your routing structure
+        // Change router to photographer page
         navigate(`/photographer/${photographerId}`)
-
     }
 
     if (isLoading) {

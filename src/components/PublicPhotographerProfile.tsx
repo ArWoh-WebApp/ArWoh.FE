@@ -171,7 +171,6 @@ export function PublicPhotographerProfile({ photographerId }: PublicPhotographer
     const handleAddToCart = () => {
         if (selectedImage) {
             addItem(selectedImage.id, quantity)
-            toast.success("Added to cart!")
         }
     }
 

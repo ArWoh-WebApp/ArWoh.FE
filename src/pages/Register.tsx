@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useCallback, memo, useRef } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -16,54 +15,56 @@ import { useNavigate, Link } from "react-router-dom"
 
 import logoImage from "@/assets/images/logo.png"
 
+// Memoized Iridescence with frozen props to prevent re-renders
+const MemoizedIridescence = memo(Iridescence, () => true) // Force the component to never re-render
+
 export default function RegisterPage() {
   const [showPassword1, setShowPassword1] = useState(false)
   const [showPassword2, setShowPassword2] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [role, setRole] = useState("")
   const navigate = useNavigate()
 
-  // Form state
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    role: "",
-    password: "",
-    confirmPassword: "",
-  })
+  // Use refs instead of state for form fields to prevent re-renders during typing
+  const usernameRef = useRef<HTMLInputElement>(null)
+  const emailRef = useRef<HTMLInputElement>(null)
+  const passwordRef = useRef<HTMLInputElement>(null)
+  const confirmPasswordRef = useRef<HTMLInputElement>(null)
 
-  // Handle input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }))
-  }
+  const togglePassword1 = useCallback(() => {
+    setShowPassword1(prev => !prev)
+  }, [])
 
-  // Handle role selection
-  const handleRoleSelect = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      role: value,
-    }))
-  }
+  const togglePassword2 = useCallback(() => {
+    setShowPassword2(prev => !prev)
+  }, [])
+
+  const handleRoleSelect = useCallback((value: string) => {
+    setRole(value)
+  }, [])
 
   // Form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
 
+    // Get values from refs at submit time
+    const username = usernameRef.current?.value || ""
+    const email = emailRef.current?.value || ""
+    const password = passwordRef.current?.value || ""
+    const confirmPassword = confirmPasswordRef.current?.value || ""
+
     // Validation
-    if (!formData.email || !formData.password) {
+    if (!email || !password) {
       toast.error("Please fill in all required fields")
       return
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    if (password !== confirmPassword) {
       toast.error("Passwords do not match")
       return
     }
 
-    if (!formData.role) {
+    if (!role) {
       toast.error("Please select a role")
       return
     }
@@ -72,15 +73,15 @@ export default function RegisterPage() {
 
     try {
       const payload: Auth.RegisterPayload = {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
+        username,
+        email,
+        password,
       }
 
       let response: Auth.RegisterResponse
 
       // Call different APIs based on role
-      if (formData.role.toLowerCase() === "customer") {
+      if (role.toLowerCase() === "customer") {
         response = await Auth.registerCustomer(payload)
       } else {
         response = await Auth.registerPhotographer(payload)
@@ -99,18 +100,23 @@ export default function RegisterPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [role, navigate])
 
   return (
     <main className="min-h-screen w-full relative bg-[#0D0D0D] overflow-hidden">
-      {/* Animated Background */}
+      {/* Animated Background - Rendered only once and never re-rendered */}
       <div className="absolute inset-0">
-        <Iridescence color={[0.2, 0, 0.3]} speed={0.7} amplitude={0.2} mouseReact={true} />
+        <MemoizedIridescence
+          color={[0.2, 0, 0.3]}
+          speed={0.7}
+          amplitude={0.2}
+          mouseReact={true}
+        />
       </div>
 
       {/* Logo */}
       <div className="relative z-10 p-6">
-        <img src={logoImage || "/placeholder.svg"} alt="ArWoh" className="h-8d" />
+        <img src={logoImage || "/placeholder.svg"} alt="ArWoh" className="h-8" />
       </div>
 
       {/* Register Form */}
@@ -135,8 +141,7 @@ export default function RegisterPage() {
                   id="username"
                   placeholder="Username"
                   type="text"
-                  value={formData.username}
-                  onChange={handleChange}
+                  ref={usernameRef}
                   required
                 />
               </LabelInputContainer>
@@ -144,7 +149,7 @@ export default function RegisterPage() {
                 <Label className="text-white" htmlFor="role">
                   Role
                 </Label>
-                <Select value={formData.role} onValueChange={handleRoleSelect}>
+                <Select value={role} onValueChange={handleRoleSelect}>
                   <SelectTrigger
                     id="role"
                     className="bg-white/5 border-white/10 text-white placeholder:text-gray-400 h-10"
@@ -166,8 +171,7 @@ export default function RegisterPage() {
                 id="email"
                 placeholder="projectmayhem@fc.com"
                 type="email"
-                value={formData.email}
-                onChange={handleChange}
+                ref={emailRef}
                 required
               />
             </LabelInputContainer>
@@ -180,13 +184,12 @@ export default function RegisterPage() {
                   id="password"
                   placeholder="••••••••"
                   type={showPassword1 ? "text" : "password"}
-                  value={formData.password}
-                  onChange={handleChange}
+                  ref={passwordRef}
                   required
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword1(!showPassword1)}
+                  onClick={togglePassword1}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                 >
                   {showPassword1 ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -202,13 +205,12 @@ export default function RegisterPage() {
                   id="confirmPassword"
                   placeholder="••••••••"
                   type={showPassword2 ? "text" : "password"}
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
+                  ref={confirmPasswordRef}
                   required
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword2(!showPassword2)}
+                  onClick={togglePassword2}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                 >
                   {showPassword2 ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -251,7 +253,7 @@ export default function RegisterPage() {
   )
 }
 
-const LabelInputContainer = ({
+const LabelInputContainer = memo(({
   children,
   className,
 }: {
@@ -259,5 +261,4 @@ const LabelInputContainer = ({
   className?: string
 }) => {
   return <div className={cn("flex flex-col space-y-2 w-full", className)}>{children}</div>
-}
-
+})
