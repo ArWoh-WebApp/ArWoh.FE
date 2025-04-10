@@ -25,8 +25,9 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { RichTextEditor } from "@/components/richText/RichTextEditor"
 import { RichTextContent } from "@/components/richText/RichTextContent"
+import { RichTextEditor } from "@/components/richText/RichTextEditor"
+
 
 export function PhotographerProfile() {
     const [profile, setProfile] = useState<UserService.User | null>(null)
@@ -847,7 +848,7 @@ export function PhotographerProfile() {
 
             {/* Upload Image Dialog */}
             <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
-                <DialogContent className="sm:max-w-6xl bg-black/95 border-white/10 max-h-[90vh] overflow-hidden">
+                <DialogContent className="sm:max-w-6xl bg-black/95 border-white/10 max-h-[90vh] flex flex-col">
                     <DialogHeader>
                         <DialogTitle className="text-xl text-white">Upload New Image</DialogTitle>
                         <DialogDescription className="text-white/60">
@@ -855,60 +856,67 @@ export function PhotographerProfile() {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="flex flex-col md:flex-row gap-6 mt-4 h-[70vh]">
-                        {/* Left side - File Upload Area */}
-                        <div className="md:w-2/5 flex-shrink-0 h-full">
-                            <div
-                                className={`relative border-2 border-dashed ${formData.file ? "border-purple-500" : "border-purple-500/30"} rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-purple-500/50 transition-colors h-full`}
-                                onClick={() => fileInputRef.current?.click()}
-                            >
-                                <input
-                                    id="file"
-                                    name="file"
-                                    type="file"
-                                    ref={fileInputRef}
-                                    onChange={handleFileChange}
-                                    accept="image/*"
-                                    className="hidden"
-                                />
+                    {/* Content area with scrollable section */}
+                    <div className="flex-1 min-h-0 flex flex-col">
+                        <div
+                            className="flex flex-col md:flex-row gap-6 mt-4 flex-1 overflow-y-auto"
+                            style={{
+                                scrollbarWidth: "thin",
+                                scrollbarColor: "rgba(255, 255, 255, 0.2) transparent",
+                            }}
+                        >
+                            {/* Left side - File Upload Area */}
+                            <div className="md:w-2/5 flex-shrink-0 h-full">
+                                <div
+                                    className={`relative border-2 border-dashed ${formData.file ? "border-purple-500" : "border-purple-500/30"} rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-purple-500/50 transition-colors h-full`}
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    <input
+                                        id="file"
+                                        name="file"
+                                        type="file"
+                                        ref={fileInputRef}
+                                        onChange={handleFileChange}
+                                        accept="image/*"
+                                        className="hidden"
+                                    />
 
-                                {formData.file ? (
-                                    <div className="w-full flex flex-col items-center">
-                                        <div className="relative w-full h-[400px] mb-4 overflow-hidden rounded-lg border border-white/20">
-                                            <img
-                                                src={URL.createObjectURL(formData.file) || "/placeholder.svg"}
-                                                alt="Preview"
-                                                className="w-full h-full object-contain"
-                                            />
+                                    {formData.file ? (
+                                        <div className="w-full flex flex-col items-center">
+                                            <div className="relative w-full h-[400px] mb-4 overflow-hidden rounded-lg border border-white/20">
+                                                <img
+                                                    src={URL.createObjectURL(formData.file) || "/placeholder.svg"}
+                                                    alt="Preview"
+                                                    className="w-full h-full object-contain"
+                                                />
+                                            </div>
+                                            <p className="text-sm text-white/80 truncate max-w-full">{formData.file.name}</p>
+                                            <button
+                                                type="button"
+                                                className="mt-2 text-xs text-purple-400 hover:text-purple-300"
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    setFormData({ ...formData, file: undefined })
+                                                    if (fileInputRef.current) fileInputRef.current.value = ""
+                                                }}
+                                            >
+                                                Change image
+                                            </button>
                                         </div>
-                                        <p className="text-sm text-white/80 truncate max-w-full">{formData.file.name}</p>
-                                        <button
-                                            type="button"
-                                            className="mt-2 text-xs text-purple-400 hover:text-purple-300"
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                setFormData({ ...formData, file: undefined })
-                                                if (fileInputRef.current) fileInputRef.current.value = ""
-                                            }}
-                                        >
-                                            Change image
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                                            <Plus className="h-12 w-12 text-gray-400" />
-                                        </div>
-                                        <p className="text-gray-400 text-base font-medium">Click to upload image</p>
-                                        <p className="text-white/40 text-sm mt-2 text-center">PNG, JPG or WEBP (max. 10MB)</p>
-                                    </>
-                                )}
+                                    ) : (
+                                        <>
+                                            <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                                                <Plus className="h-12 w-12 text-gray-400" />
+                                            </div>
+                                            <p className="text-gray-400 text-base font-medium">Click to upload image</p>
+                                            <p className="text-white/40 text-sm mt-2 text-center">PNG, JPG or WEBP (max. 10MB)</p>
+                                        </>
+                                    )}
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Right side - Form Fields */}
-                        <div className="md:w-3/5 h-full">
-                            <ScrollArea className="h-full pr-4">
+                            {/* Right side - Form Fields */}
+                            <div className="md:w-3/5 h-full pr-4">
                                 <div className="space-y-6 pb-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="upload-title" className="text-white/80">
@@ -1011,11 +1019,12 @@ export function PhotographerProfile() {
                                         />
                                     </div>
                                 </div>
-                            </ScrollArea>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex justify-end gap-4 mt-6">
+                    {/* Fixed footer with buttons */}
+                    <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-white/10">
                         <Button
                             variant="outline"
                             onClick={() => setIsUploadDialogOpen(false)}
@@ -1036,4 +1045,3 @@ export function PhotographerProfile() {
         </div>
     )
 }
-
