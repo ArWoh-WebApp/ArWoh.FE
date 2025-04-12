@@ -97,4 +97,21 @@ export const paymentService = {
             }
         }
     },
+
+    // Cancel a payment by ID
+    cancelPayment: async (paymentId: number, reason?: string): Promise<ApiResponse<boolean>> => {
+        try {
+            const response = await axiosInstance.post<ApiResponse<boolean>>(`/payments/${paymentId}/cancel`, {
+                reason: reason || "Cancelled by user",
+            })
+            return response.data
+        } catch (error) {
+            console.error(`Error cancelling payment with ID ${paymentId}:`, error)
+            return {
+                isSuccess: false,
+                message: "Failed to cancel payment",
+                data: false,
+            }
+        }
+    },
 }
