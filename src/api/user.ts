@@ -5,7 +5,6 @@ import { ApiResponse } from "./apiResponse"
 
 const PROFILE_API = "/users/me/profile"
 const UPDATE_AVATAR_API = "/users/me/avatar"
-const USER_TRANSACTIONS_API = "/images/bought-by-user"
 
 export namespace UserService {
 
@@ -79,20 +78,6 @@ export namespace UserService {
                 isSuccess: false,
                 message: error.message || "Failed to update avatar",
                 data: null as any,
-            }
-        }
-    }
-
-    // Fetch User Transactions
-    export async function getUserTransactions(): Promise<ApiResponse<Transaction[]>> {
-        try {
-            const response = await axiosInstance.get<ApiResponse<Transaction[]>>(USER_TRANSACTIONS_API)
-            return response.data
-        } catch (error: any) {
-            return {
-                isSuccess: false,
-                message: error.message || "Failed to fetch user transactions",
-                data: [] as any,
             }
         }
     }

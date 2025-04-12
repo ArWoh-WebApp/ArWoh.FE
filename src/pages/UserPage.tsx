@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { UserProfile } from "@/components/user/UserProfile"
 import { UserTransactions } from "@/components/user/UserTransaction"
@@ -50,36 +48,28 @@ export default function UserPage() {
                     ))}
                 </div>
 
-                {/* Content */}
-                <div className="relative">
-                    <AnimatedTabContent isVisible={activeTab === "profile"}>
+                {/* Content - Using a min-height container with relative positioning */}
+                <div className="relative min-h-[calc(100vh-16rem)] pb-32">
+                    {/* Each tab content is in a container with proper positioning */}
+                    <div
+                        className={cn(
+                            "transition-opacity duration-300",
+                            activeTab === "profile" ? "opacity-100" : "opacity-0 pointer-events-none absolute inset-0",
+                        )}
+                    >
                         <UserProfile />
-                    </AnimatedTabContent>
-                    <AnimatedTabContent isVisible={activeTab === "transactions"}>
+                    </div>
+
+                    <div
+                        className={cn(
+                            "transition-opacity duration-300",
+                            activeTab === "transactions" ? "opacity-100" : "opacity-0 pointer-events-none absolute inset-0",
+                        )}
+                    >
                         <UserTransactions />
-                    </AnimatedTabContent>
+                    </div>
                 </div>
             </div>
         </div>
     )
 }
-
-function AnimatedTabContent({
-    children,
-    isVisible,
-}: {
-    children: React.ReactNode
-    isVisible: boolean
-}) {
-    return (
-        <div
-            className={cn(
-                "absolute inset-0 transition-opacity duration-300",
-                isVisible ? "opacity-100" : "pointer-events-none opacity-0",
-            )}
-        >
-            {children}
-        </div>
-    )
-}
-
