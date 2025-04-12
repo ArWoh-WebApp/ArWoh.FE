@@ -24,6 +24,7 @@ import { useEffect } from "react"
 import StoryOfArtPage from "./pages/StoryOfArtPage"
 import { SecurityWrapper } from "./components/security/SecurityWrapper"
 import PrintScreenProtection from "./components/security/PrintScreenProtection"
+import PaymentSuccess from "./pages/PaymentSuccess"
 
 // Define route patterns
 const routePatterns = [
@@ -37,6 +38,7 @@ const routePatterns = [
 	"/portfolio",
 	"/story-of-art",
 	"/not-found",
+	"/payment-success",
 ]
 
 // Function to check if a path matches any of the route patterns
@@ -147,7 +149,14 @@ const AppContent: React.FC = () => {
 									</PageTransition>
 								}
 							/>
-
+							<Route
+								path="/payment-success"
+								element={
+									<PageTransition>
+										<PaymentSuccess />
+									</PageTransition>
+								}
+							/>
 							{/* Protected Routes */}
 							<Route
 								path="/user-profile"
