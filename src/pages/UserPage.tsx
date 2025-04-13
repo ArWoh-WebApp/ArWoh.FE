@@ -24,7 +24,7 @@ export default function UserPage() {
 
     return (
         <div className="min-h-screen bg-black text-white">
-            <div className="mx-auto max-w-6xl px-4 py-8">
+            <div className="mx-auto max-w-6xl px-4 py-8 flex-grow">
                 {/* Tabs */}
                 <div className="mb-8 flex space-x-4">
                     {(["profile", "transactions"] as const).map((tab) => (
