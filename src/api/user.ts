@@ -46,6 +46,12 @@ export namespace UserService {
         }
     }
 
+    export interface UpdateProfileRequest {
+        username: string
+        email: string
+        bio: string | null
+      }
+
     // Fetch User Profile
     export async function getUserProfile(): Promise<ApiResponse<User>> {
         try {
@@ -81,5 +87,20 @@ export namespace UserService {
             }
         }
     }
+
+    // Update User Profile
+    export async function updateUserProfile(profileData: UpdateProfileRequest): Promise<ApiResponse<User>> {
+        try {
+            const response = await axiosInstance.put<ApiResponse<User>>(PROFILE_API, profileData)
+            return response.data
+        } catch (error: any) {
+            return {
+                isSuccess: false,
+                message: error.message || "Failed to update user profile",
+                data: null as any,
+            }
+        }
+    }
+
 }
 

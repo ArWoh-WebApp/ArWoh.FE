@@ -1,6 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useEffect, useState } from "react"
@@ -25,16 +22,6 @@ import {
     Tooltip,
     CartesianGrid,
 } from "recharts"
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
 
 // Status badge colors
@@ -60,11 +47,12 @@ export function UserTransactions() {
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
     const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
-    // Chart data
+    // Chart data 
     const [chartData, setChartData] = useState<any[]>([])
 
     const [isCancelling, setIsCancelling] = useState(false)
-    const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
+    // First, add a new state for the cancellation reason
+    const [cancelReason, setCancelReason] = useState<string>("Cancelled by user")
 
     // Fetch transactions with filters
     const fetchTransactions = async () => {
@@ -154,48 +142,49 @@ export function UserTransactions() {
         }
     }
 
+    // Replace the handleCancelPayment function with this updated version
     const handleCancelPayment = async () => {
-        if (!selectedTransaction) return;
+        if (!selectedTransaction) return
 
         try {
-            setIsCancelling(true);
-            const response = await paymentService.cancelPayment(selectedTransaction.paymentId, "Cancelled by user");
+            setIsCancelling(true)
+            const response = await paymentService.cancelPayment(selectedTransaction.paymentId, cancelReason)
 
             if (response.isSuccess) {
-                // First close ALL dialogs completely
-                setIsCancelDialogOpen(false);
-                setIsDetailOpen(false);
+                // First close the detail dialog
+                setIsDetailOpen(false)
 
                 // Clear the selected transaction
-                setSelectedTransaction(null);
+                setSelectedTransaction(null)
 
                 // Show success message
-                toast.success("Payment cancelled successfully");
+                toast.success("Payment cancelled successfully")
+
+                // Reset the cancel reason to default
+                setCancelReason("Cancelled by user")
 
                 // Add a slight delay before refreshing data to ensure UI cleanup completes
                 setTimeout(() => {
-                    fetchTransactions();
-                }, 100);
+                    fetchTransactions()
+                }, 100)
             } else {
-                toast.error(response.message || "Failed to cancel payment");
+                toast.error(response.message || "Failed to cancel payment")
             }
         } catch (error) {
-            console.error("Error cancelling payment:", error);
-            toast.error("An error occurred while cancelling the payment");
+            console.error("Error cancelling payment:", error)
+            toast.error("An error occurred while cancelling the payment")
         } finally {
-            setIsCancelling(false);
+            setIsCancelling(false)
         }
-    };
+    }
 
     // Add proper cleanup when closing the detail dialog
-    // Replace the existing setIsDetailOpen function with this improved version
     const handleDetailDialogChange = (open: boolean) => {
         setIsDetailOpen(open)
         if (!open) {
-            // Clean up selected transaction when closing the dialog
             setTimeout(() => {
                 setSelectedTransaction(null)
-            }, 300) // Small delay to allow animation to complete
+            }, 300)
         }
     }
 
@@ -512,74 +501,47 @@ export function UserTransactions() {
                             )}
 
                             {selectedTransaction.status === "PENDING" && (
-                                <div className="pt-4 pb-2">
-                                    <Button
-                                        className="w-full bg-red-600 hover:bg-red-700 flex items-center justify-center gap-2"
-                                        onClick={() => setIsCancelDialogOpen(true)}
-                                        disabled={isCancelling}
-                                    >
-                                        {isCancelling ? (
-                                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                        ) : (
-                                            <Ban className="h-4 w-4 mr-2" />
+                                <div className="pt-4 pb-2 space-y-4">
+                                    <div className="space-y-2">
+                                        <label htmlFor="cancelReason" className="text-sm text-white/60">
+                                            Cancellation Reason
+                                        </label>
+                                        <textarea
+                                            id="cancelReason"
+                                            value={cancelReason}
+                                            onChange={(e) => setCancelReason(e.target.value)}
+                                            className="w-full h-20 px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                            placeholder="Enter reason for cancellation"
+                                        />
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <Button
+                                            className="flex-1 bg-red-600 hover:bg-red-700 flex items-center justify-center gap-2"
+                                            onClick={handleCancelPayment}
+                                            disabled={isCancelling || !cancelReason.trim()}
+                                        >
+                                            {isCancelling ? (
+                                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                            ) : (
+                                                <Ban className="h-4 w-4 mr-2" />
+                                            )}
+                                            Cancel Payment
+                                        </Button>
+                                        {selectedTransaction.paymentUrl && (
+                                            <Button
+                                                className="flex-1 bg-purple-600 hover:bg-purple-700"
+                                                onClick={() => window.open(selectedTransaction.paymentUrl, "_blank")}
+                                            >
+                                                View Payment Page
+                                            </Button>
                                         )}
-                                        Cancel Payment
-                                    </Button>
-                                </div>
-                            )}
-
-                            {selectedTransaction.paymentUrl && (
-                                <div className="pt-4">
-                                    <Button
-                                        className="w-full bg-purple-600 hover:bg-purple-700"
-                                        onClick={() => window.open(selectedTransaction.paymentUrl, "_blank")}
-                                    >
-                                        View Payment Page
-                                    </Button>
+                                    </div>
                                 </div>
                             )}
                         </div>
                     )}
                 </DialogContent>
             </Dialog>
-
-            {/* Cancel Payment Confirmation Dialog */}
-            <AlertDialog
-                open={isCancelDialogOpen}
-                onOpenChange={(open) => {
-                    // Don't do anything fancy here, just set the state
-                    if (!isCancelling) {
-                        setIsCancelDialogOpen(open);
-                    }
-                }}
-            >
-                <AlertDialogContent className="bg-black border-white/10 text-white">
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Cancel Payment</AlertDialogTitle>
-                        <AlertDialogDescription className="text-white/60">
-                            Are you sure you want to cancel this payment? This action cannot be undone.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel
-                            className="border-white/10 bg-white/5 text-white hover:bg-white/10"
-                            disabled={isCancelling}
-                        >
-                            No, keep it
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            className="bg-red-600 hover:bg-red-700 text-white"
-                            onClick={(e) => {
-                                e.preventDefault(); // Prevent default behavior
-                                handleCancelPayment();
-                            }}
-                            disabled={isCancelling}
-                        >
-                            {isCancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Yes, cancel payment"}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </div>
     )
 }

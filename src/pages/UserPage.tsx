@@ -3,12 +3,13 @@
 import { useState } from "react"
 import { UserProfile } from "@/components/user/UserProfile"
 import { UserTransactions } from "@/components/user/UserTransaction"
+import { UserShipping } from "@/components/user/UserShipping"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
 import { useAuth } from "@/contexts/AuthContext"
 import { Loader2 } from "lucide-react"
 
-type Tab = "profile" | "transactions"
+type Tab = "profile" | "transactions" | "shipping"
 
 export default function UserPage() {
     const [activeTab, setActiveTab] = useState<Tab>("profile")
@@ -24,10 +25,10 @@ export default function UserPage() {
 
     return (
         <div className="min-h-screen bg-black text-white">
-            <div className="mx-auto max-w-6xl px-4 py-8">
+            <div className="mx-auto max-w-6xl px-4 py-8 flex-grow">
                 {/* Tabs */}
                 <div className="mb-8 flex space-x-4">
-                    {(["profile", "transactions"] as const).map((tab) => (
+                    {(["profile", "transactions", "shipping"] as const).map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -48,9 +49,8 @@ export default function UserPage() {
                     ))}
                 </div>
 
-                {/* Content - Using a min-height container with relative positioning */}
-                <div className="relative min-h-[calc(100vh-16rem)] pb-32">
-                    {/* Each tab content is in a container with proper positioning */}
+                {/* Content */}
+                <div className="relative min-h-[calc(100vh-16rem)]">
                     <div
                         className={cn(
                             "transition-opacity duration-300",
@@ -67,6 +67,15 @@ export default function UserPage() {
                         )}
                     >
                         <UserTransactions />
+                    </div>
+
+                    <div
+                        className={cn(
+                            "transition-opacity duration-300",
+                            activeTab === "shipping" ? "opacity-100" : "opacity-0 pointer-events-none absolute inset-0",
+                        )}
+                    >
+                        <UserShipping />
                     </div>
                 </div>
             </div>
