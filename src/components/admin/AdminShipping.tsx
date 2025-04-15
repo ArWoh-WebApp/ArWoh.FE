@@ -316,7 +316,7 @@ export function AdminShipping() {
                         <SelectTrigger className="w-full sm:w-40 bg-white/5 border-white/10 text-white">
                             <SelectValue placeholder="Filter by status" />
                         </SelectTrigger>
-                        <SelectContent className="bg-black border-white/10">
+                        <SelectContent className="bg-black text-white border-white/10 divide-y divide-white/20">
                             <SelectItem value="All">All Statuses</SelectItem>
                             <SelectItem value="Pending">Pending</SelectItem>
                             <SelectItem value="Confirmed">Confirmed</SelectItem>
@@ -331,7 +331,7 @@ export function AdminShipping() {
                     <Button
                         variant="outline"
                         size="icon"
-                        className="border-white/10 text-white hover:bg-white/10"
+                        className="border-white/10 text-black hover:bg-white/10 hover:text-white"
                         onClick={fetchShippingOrders}
                     >
                         <Loader2 className={cn("h-4 w-4", isLoadingOrders && "animate-spin")} />
@@ -386,7 +386,7 @@ export function AdminShipping() {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="border-white/10 text-white hover:bg-white/10"
+                                        className="border-white/10 text-black hover:bg-white/10 hover:text-white"
                                         onClick={() => viewOrderDetails(order)}
                                     >
                                         <ChevronRight className="h-4 w-4" />
@@ -509,7 +509,7 @@ export function AdminShipping() {
 
                                         <div className="space-y-4">
                                             <div className="space-y-2">
-                                                <Label htmlFor="newStatus">New Status</Label>
+                                                <Label htmlFor="newStatus" className="text-white">New Status</Label>
                                                 <Select value={newStatus} onValueChange={setNewStatus}>
                                                     <SelectTrigger id="newStatus" className="bg-white/5 border-white/10 text-white">
                                                         <SelectValue placeholder="Select new status" />
@@ -524,7 +524,7 @@ export function AdminShipping() {
                                             </div>
 
                                             <div className="space-y-2">
-                                                <Label htmlFor="statusNote">Status Note</Label>
+                                                <Label htmlFor="statusNote" className="text-white">Status Note</Label>
                                                 <Textarea
                                                     id="statusNote"
                                                     placeholder="Enter a note for this status update"
@@ -713,7 +713,7 @@ export function AdminShipping() {
                         <Button
                             variant="outline"
                             onClick={() => setIsOrderDetailsOpen(false)}
-                            className="border-white/10 bg-white/5 text-white hover:bg-white/10"
+                            className="border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-white"
                         >
                             Close
                         </Button>
