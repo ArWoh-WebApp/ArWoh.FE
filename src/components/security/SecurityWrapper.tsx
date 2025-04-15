@@ -11,33 +11,50 @@ interface SecurityWrapperProps {
 export function SecurityWrapper({ children }: SecurityWrapperProps) {
     const [isProtectionActive, setIsProtectionActive] = useState(false)
     const [devToolsOpen, setDevToolsOpen] = useState(false)
-    const [isCaptureAttempted, setIsCaptureAttempted] = useState(false)
     const wrapperRef = useRef<HTMLDivElement>(null)
     const overlayRef = useRef<HTMLDivElement>(null)
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    // Constant overlay visibility - helps prevent clean screenshots
-    const [overlayVisible, setOverlayVisible] = useState(true)
+    // Track if we've already shown a toast to prevent spam
+    const hasShownToastRef = useRef<{
+        devTools: boolean
+        rightClick: boolean
+        screenshot: boolean
+        shortcut: boolean
+    }>({
+        devTools: false,
+        rightClick: false,
+        screenshot: false,
+        shortcut: false,
+    })
 
-    // Function to detect if developer tools are open
+    // Function to detect if developer tools are open - less aggressive
     useEffect(() => {
         const detectDevTools = () => {
-            const widthThreshold = window.outerWidth - window.innerWidth > 160
-            const heightThreshold = window.outerHeight - window.innerHeight > 160
+            // More lenient thresholds to reduce false positives
+            const widthThreshold = window.outerWidth - window.innerWidth > 200
+            const heightThreshold = window.outerHeight - window.innerHeight > 200
 
             // Check if dev tools are open based on window dimensions
             if (widthThreshold || heightThreshold) {
                 if (!devToolsOpen) {
                     setDevToolsOpen(true)
-                    toast.error("Developer tools detected. Image protection activated.")
+                    if (!hasShownToastRef.current.devTools) {
+                        toast.error("Developer tools detected. Image protection activated.")
+                        hasShownToastRef.current.devTools = true
+                    }
                 }
             } else if (devToolsOpen) {
                 setDevToolsOpen(false)
+                // Reset toast flag when dev tools are closed
+                hasShownToastRef.current.devTools = false
             }
         }
 
-        // Check for console opening
-        const interval = setInterval(detectDevTools, 500)
+        // Check less frequently to reduce performance impact
+        const interval = setInterval(detectDevTools, 2000)
+
+        // Only check on resize, not constantly
         window.addEventListener("resize", detectDevTools)
 
         return () => {
@@ -49,7 +66,6 @@ export function SecurityWrapper({ children }: SecurityWrapperProps) {
     // Function to activate protection (black screen) temporarily
     const activateProtection = () => {
         setIsProtectionActive(true)
-        setIsCaptureAttempted(true)
 
         // Clear any existing timeout
         if (timeoutRef.current) {
@@ -59,60 +75,62 @@ export function SecurityWrapper({ children }: SecurityWrapperProps) {
         // Set timeout to deactivate protection after a short delay
         timeoutRef.current = setTimeout(() => {
             setIsProtectionActive(false)
-
-            // Keep capture attempted state for a longer period
-            setTimeout(() => {
-                setIsCaptureAttempted(false)
-            }, 2000)
         }, 1000)
     }
-
-    // Create a more continuous protection by cycling a subtle overlay
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setOverlayVisible(prev => !prev)
-        }, 100) // Fast interval makes it harder to time screenshots
-
-        return () => clearInterval(interval)
-    }, [])
 
     // Disable right-click context menu
     useEffect(() => {
         const handleContextMenu = (e: MouseEvent) => {
-            e.preventDefault()
-            toast.error("Right-click is disabled for image protection")
-            return false
+            // Only prevent right-click on images, not the entire page
+            if (
+                e.target instanceof HTMLImageElement ||
+                e.target instanceof HTMLCanvasElement ||
+                e.target instanceof HTMLVideoElement
+            ) {
+                e.preventDefault()
+                if (!hasShownToastRef.current.rightClick) {
+                    toast.error("Right-click is disabled for image protection")
+                    hasShownToastRef.current.rightClick = true
+                    // Reset after a delay
+                    setTimeout(() => {
+                        hasShownToastRef.current.rightClick = false
+                    }, 5000)
+                }
+                return false
+            }
         }
 
-        // Monitor keyboard shortcuts with more aggressive approach
+        // Monitor keyboard shortcuts with more targeted approach
         const handleKeyDown = (e: KeyboardEvent) => {
             // For PrintScreen, we want to make all images black BEFORE the screenshot is taken
             if (e.key === "PrintScreen" || e.code === "PrintScreen") {
-                // Don't try to prevent it - instead make all images black immediately
-                document.body.classList.add("printscreen-capture")
                 activateProtection()
-
-                // Show the protection message
-                toast.error("Screenshots are protected")
-
-                // Remove the protection after a short delay (after screenshot is taken)
-                setTimeout(() => {
-                    document.body.classList.remove("printscreen-capture")
-                }, 500)
-
+                if (!hasShownToastRef.current.screenshot) {
+                    toast.error("Screenshots are protected")
+                    hasShownToastRef.current.screenshot = true
+                    setTimeout(() => {
+                        hasShownToastRef.current.screenshot = false
+                    }, 5000)
+                }
                 return false
             }
 
             // For Win+Shift+S and other combinations, try to prevent and warn
             if (
-                (e.shiftKey && (e.metaKey || e.ctrlKey || e.getModifierState("Meta") || e.getModifierState("OS"))) ||
-                (e.key === "s" && e.shiftKey && (e.metaKey || e.ctrlKey || e.getModifierState("Meta") || e.getModifierState("OS"))) ||
-                (e.key === "S" && e.shiftKey && (e.metaKey || e.ctrlKey || e.getModifierState("Meta") || e.getModifierState("OS")))
+                (e.key === "s" || e.key === "S") &&
+                e.shiftKey &&
+                (e.metaKey || e.ctrlKey || e.getModifierState("Meta") || e.getModifierState("OS"))
             ) {
                 e.preventDefault()
                 e.stopPropagation()
                 activateProtection()
-                toast.error("Screenshots are protected")
+                if (!hasShownToastRef.current.screenshot) {
+                    toast.error("Screenshots are protected")
+                    hasShownToastRef.current.screenshot = true
+                    setTimeout(() => {
+                        hasShownToastRef.current.screenshot = false
+                    }, 5000)
+                }
                 return false
             }
 
@@ -120,16 +138,22 @@ export function SecurityWrapper({ children }: SecurityWrapperProps) {
             if (
                 e.key === "F12" ||
                 (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j")) ||
-                (e.ctrlKey && (e.key === "U" || e.key === "u" || e.key === "S" || e.key === "s" || e.key === "P" || e.key === "p"))
+                (e.ctrlKey && (e.key === "U" || e.key === "u"))
             ) {
                 e.preventDefault()
                 e.stopPropagation()
-                toast.error("This keyboard shortcut is disabled for image protection")
+                if (!hasShownToastRef.current.shortcut) {
+                    toast.error("This keyboard shortcut is disabled for image protection")
+                    hasShownToastRef.current.shortcut = true
+                    setTimeout(() => {
+                        hasShownToastRef.current.shortcut = false
+                    }, 5000)
+                }
                 return false
             }
         }
 
-        // Disable drag and drop
+        // Disable drag and drop only for images
         const handleDragStart = (e: DragEvent) => {
             if (e.target instanceof HTMLImageElement) {
                 e.preventDefault()
@@ -141,21 +165,11 @@ export function SecurityWrapper({ children }: SecurityWrapperProps) {
         document.addEventListener("keydown", handleKeyDown, true) // Use capture phase for earlier interception
         document.addEventListener("dragstart", handleDragStart as EventListener)
 
-        // Additional protection - blur images on focus loss
-        const handleVisibilityChange = () => {
-            if (document.visibilityState !== "visible") {
-                activateProtection()
-            }
-        }
-
-        document.addEventListener("visibilitychange", handleVisibilityChange)
-
         // Cleanup
         return () => {
             document.removeEventListener("contextmenu", handleContextMenu)
             document.removeEventListener("keydown", handleKeyDown, true)
             document.removeEventListener("dragstart", handleDragStart as EventListener)
-            document.removeEventListener("visibilitychange", handleVisibilityChange)
         }
     }, [])
 
@@ -173,25 +187,9 @@ export function SecurityWrapper({ children }: SecurityWrapperProps) {
       }
       
       /* Add a pseudo-element over images when dev tools are detected */
-      ${devToolsOpen || isCaptureAttempted
+      ${devToolsOpen
                 ? `
       img::after {
-        content: "Protected Image";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.7);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        z-index: 9999;
-      }
-      
-      canvas::after {
         content: "Protected Image";
         position: absolute;
         top: 0;
@@ -215,22 +213,7 @@ export function SecurityWrapper({ children }: SecurityWrapperProps) {
         return () => {
             document.head.removeChild(style)
         }
-    }, [devToolsOpen, isCaptureAttempted])
-
-    // Detect and block screenshot attempts
-    useEffect(() => {
-        const handleClipboardEvent = () => {
-            activateProtection()
-        }
-
-        document.addEventListener("copy", handleClipboardEvent)
-        document.addEventListener("cut", handleClipboardEvent)
-
-        return () => {
-            document.removeEventListener("copy", handleClipboardEvent)
-            document.removeEventListener("cut", handleClipboardEvent)
-        }
-    }, [])
+    }, [devToolsOpen])
 
     return (
         <div
@@ -244,29 +227,19 @@ export function SecurityWrapper({ children }: SecurityWrapperProps) {
         >
             {children}
 
-            {/* Add a constantly changing watermark overlay */}
+            {/* Add an invisible watermark on all pages - static, not changing */}
             <div
-                className="fixed inset-0 pointer-events-none z-[9990] select-none"
+                className="fixed inset-0 pointer-events-none z-[9998] opacity-[0.02] select-none"
                 style={{
                     backgroundImage:
-                        "repeating-linear-gradient(45deg, rgba(255,255,255,0.03), rgba(255,255,255,0.03) 20px, transparent 20px, transparent 40px)",
-                    opacity: overlayVisible ? 0.03 : 0.02, // Subtle flicker effect
-                }}
-            />
-
-            {/* Subtle noise overlay */}
-            <div
-                className="fixed inset-0 pointer-events-none z-[9991] select-none"
-                style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-                    opacity: 0.01, // Very subtle
+                        "repeating-linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.1) 20px, transparent 20px, transparent 40px)",
                 }}
             />
 
             {/* Black overlay that appears during screenshot attempts */}
             <div
                 ref={overlayRef}
-                className={`fixed inset-0 bg-black z-[9999] transition-opacity duration-50 pointer-events-none ${isProtectionActive ? "opacity-100" : "opacity-0"
+                className={`fixed inset-0 bg-black z-[9999] transition-opacity duration-100 pointer-events-none ${isProtectionActive ? "opacity-100" : "opacity-0"
                     }`}
             />
         </div>
