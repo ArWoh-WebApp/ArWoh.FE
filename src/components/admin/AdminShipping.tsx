@@ -514,7 +514,7 @@ export function AdminShipping() {
                                                     <SelectTrigger id="newStatus" className="bg-white/5 border-white/10 text-white">
                                                         <SelectValue placeholder="Select new status" />
                                                     </SelectTrigger>
-                                                    <SelectContent className="bg-black border-white/10">
+                                                    <SelectContent className="bg-black text-white border-white/10">
                                                         <SelectItem value={getNextPossibleStatus(selectedOrder.shippingStatus)}>
                                                             {getNextPossibleStatus(selectedOrder.shippingStatus)}
                                                         </SelectItem>
