@@ -25,6 +25,7 @@ import StoryOfArtPage from "./pages/StoryOfArtPage"
 import { SecurityWrapper } from "./components/security/SecurityWrapper"
 import PrintScreenProtection from "./components/security/PrintScreenProtection"
 import PaymentSuccess from "./pages/PaymentSuccess"
+import AdminPage from "./pages/AdminPage"
 
 // Define route patterns
 const routePatterns = [
@@ -37,6 +38,7 @@ const routePatterns = [
 	"/photographer/:id",
 	"/portfolio",
 	"/story-of-art",
+	"/admin",
 	"/not-found",
 	"/payment-success",
 ]
@@ -174,6 +176,16 @@ const AppContent: React.FC = () => {
 									<ProtectedRoute requireAuth={true} requirePhotographer={true} requireAdmin={false}>
 										<PageTransition>
 											<PhotographerPage />
+										</PageTransition>
+									</ProtectedRoute>
+								}
+							/>
+							<Route
+								path="/admin"
+								element={
+									<ProtectedRoute requireAuth={true} requirePhotographer={false} requireAdmin={true}>
+										<PageTransition>
+											<AdminPage />
 										</PageTransition>
 									</ProtectedRoute>
 								}
