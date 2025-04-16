@@ -3,8 +3,10 @@
 import { motion } from "framer-motion"
 import { Box, Palette, CreditCard } from "lucide-react"
 import { useInView } from "react-intersection-observer"
+import { useNavigate } from "react-router-dom"
 
 export default function FeaturesSection() {
+    const navigation = useNavigate()
     const [ref, inView] = useInView({
         triggerOnce: true,
         threshold: 0.1,
@@ -133,6 +135,7 @@ export default function FeaturesSection() {
                         className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-800 rounded-full text-white hover:shadow-[0_0_15px_rgba(139,92,246,0.5)] transition-all duration-300"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.98 }}
+                        onClick={() => navigation("/art-gallery")}
                     >
                         Buy
                     </motion.button>
@@ -140,6 +143,7 @@ export default function FeaturesSection() {
                         className="px-6 py-2 border border-purple-600 rounded-full text-white hover:bg-purple-600/10 hover:shadow-[0_0_10px_rgba(139,92,246,0.3)] transition-all duration-300"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.98 }}
+                        onClick={() => navigation("/art-gallery")}
                     >
                         Learn More
                     </motion.button>

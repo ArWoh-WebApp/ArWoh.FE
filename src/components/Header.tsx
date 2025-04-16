@@ -1,7 +1,7 @@
 "use client"
 
 import { useNavigate } from "react-router-dom"
-import { ChevronDown, LogOut, UserCircle, Camera, Shield, Loader2 } from "lucide-react"
+import { LogOut, UserCircle, Camera, Shield, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
 	DropdownMenu,
@@ -63,41 +63,15 @@ export default function Header() {
 
 					{/* Navigation */}
 					<nav className="hidden md:flex items-center space-x-4">
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="ghost" className="text-white">
-									Artwork <ChevronDown className="ml-2 h-4 w-4" />
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent>
-								<DropdownMenuItem onClick={() => navigate("/art-gallery")}>Photo Gallery</DropdownMenuItem>
-								<DropdownMenuItem>Printing</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
-
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="ghost" className="text-white">
-									Explore <ChevronDown className="ml-2 h-4 w-4" />
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent>
-								<DropdownMenuItem onClick={() => navigate("/portfolio")}>Portfolio</DropdownMenuItem>
-								<DropdownMenuItem onClick={() => navigate("/story-of-art")}>Story of Art</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
-
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="ghost" className="text-white">
-									Other <ChevronDown className="ml-2 h-4 w-4" />
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent>
-								<DropdownMenuItem>Option 1</DropdownMenuItem>
-								<DropdownMenuItem>Option 2</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
+						<Button variant="ghost" className="text-white" onClick={() => navigate("/art-gallery")}>
+							Art Gallery
+						</Button>
+						<Button variant="ghost" className="text-white" onClick={() => navigate("/portfolio")}>
+							Portfolio
+						</Button>
+						<Button variant="ghost" className="text-white" onClick={() => navigate("/story-of-art")}>
+							Story of Art
+						</Button>
 					</nav>
 
 					{/* Actions */}
@@ -181,4 +155,3 @@ export default function Header() {
 		</>
 	)
 }
-

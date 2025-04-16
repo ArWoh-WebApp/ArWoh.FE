@@ -3,9 +3,11 @@
 import { motion } from "framer-motion"
 import BlurText from "@/components/ui/blur-text"
 import HeroImg from "@/assets/images/heroImage.png"
+import { useNavigate } from "react-router-dom"
 
 export default function HeroSection() {
-	return (
+	const navigation = useNavigate()
+	return (	
 		<section className="relative min-h-screen overflow-hidden bg-black">
 			{/* Plain black background - removed gradient */}
 
@@ -70,6 +72,7 @@ export default function HeroSection() {
 								className="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-800 rounded-full text-white font-medium transition-all duration-300 hover:shadow-[0_0_15px_rgba(139,92,246,0.5)] hover:scale-105"
 								whileHover={{ scale: 1.05 }}
 								whileTap={{ scale: 0.98 }}
+								onClick={() => navigation("/art-gallery")}
 							>
 								Explore Gallery
 							</motion.button>
@@ -77,6 +80,7 @@ export default function HeroSection() {
 								className="px-8 py-3 border border-purple-600 rounded-full text-white font-medium transition-all duration-300 hover:bg-purple-600/20 hover:shadow-[0_0_15px_rgba(139,92,246,0.3)]"
 								whileHover={{ scale: 1.05 }}
 								whileTap={{ scale: 0.98 }}
+								onClick={() => navigation("/art-gallery")}
 							>
 								Learn More
 							</motion.button>
