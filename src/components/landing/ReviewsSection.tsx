@@ -3,7 +3,7 @@ import { motion } from "framer-motion"
 import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards"
 import { Star } from "lucide-react"
 
-const tienAvt = "https://minio.ae-tao-fullstack-api.site/api/v1/buckets/arwoh-bucket/objects/download?preview=true&prefix=landingPage%2FUntitled.png&version_id=null"
+const tienAvt = "https://minio.ae-tao-fullstack-api.site/api/v1/buckets/arwoh-bucket/objects/download?preview=true&prefix=user-avatars%2Fistockphoto-1130884625-612x612.jpg&version_id=null"
 
 const reviews = [
 	{
